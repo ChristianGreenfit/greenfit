@@ -13,3 +13,10 @@ yarn-error.log*
 *.mov
 *.HEIC
 Screenshot*
+
+# Variables d'environnement / secrets
+.env
+.env.*
+!.env.example
+supabase/.env
+supabase/.temp

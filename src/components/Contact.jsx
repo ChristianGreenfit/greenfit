@@ -1,15 +1,11 @@
 import { useState } from 'react'
+import { useContent } from '../context/ContentContext'
 import Icon from './Icon'
 import './Contact.css'
 
-const RECEPTION_HOURS = [
-  { days: 'Lundi – jeudi', hours: '8h30 – 13h30 / 16h30 – 21h00' },
-  { days: 'Vendredi', hours: '8h30 – 13h30 / 16h30 – 19h00' },
-  { days: 'Samedi', hours: '9h00 – 12h00' },
-  { days: 'Dimanche', hours: 'Fermé' },
-]
-
 export default function Contact() {
+  const { content } = useContent()
+  const { contact } = content
   const [sent, setSent] = useState(false)
 
   const handleSubmit = (e) => {
@@ -17,48 +13,47 @@ export default function Contact() {
     setSent(true)
   }
 
+  const titleParts = contact.title.split(contact.titleHighlight)
+
   return (
     <section className="section contact" id="contact">
       <div className="container contact__grid">
         <div className="contact__intro reveal">
-          <span className="eyebrow">Contact</span>
-          <h2>On se rencontre <span className="gradient-text">bientôt ?</span></h2>
-          <p>
-            3 jours d’essai gratuits, une visite du centre ou une simple question
-            notre équipe vous répond sous 24 h.
-          </p>
+          <span className="eyebrow">{contact.eyebrow}</span>
+          <h2>
+            {titleParts[0]}
+            <span className="gradient-text">{contact.titleHighlight}</span>
+            {titleParts[1] ?? ''}
+          </h2>
+          <p>{contact.intro}</p>
 
           <div className="contact__reach">
-            <a className="contact__phone" href="tel:+41275654131">
-              027 565 41 31
+            <a className="contact__phone" href={contact.phoneHref}>
+              {contact.phone}
             </a>
-            <a className="contact__email" href="mailto:info@green-fit.ch">
-              info@green-fit.ch
+            <a className="contact__email" href={`mailto:${contact.email}`}>
+              {contact.email}
             </a>
           </div>
 
           <address className="contact__addr">
-            <a
-              href="https://maps.google.com/?q=Industriestrasse+16,+3970+Salquenen"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Industriestrasse 16<br />
-              3970 Salquenen / Sierre
+            <a href={contact.mapsUrl} target="_blank" rel="noopener noreferrer">
+              {contact.addressLine1}<br />
+              {contact.addressLine2}
             </a>
           </address>
 
           <div className="contact__hours">
             <h3 className="contact__hours-title">Horaires réception</h3>
             <ul>
-              {RECEPTION_HOURS.map((slot) => (
+              {contact.receptionHours.map((slot) => (
                 <li key={slot.days}>
                   <span>{slot.days}</span>
                   <span>{slot.hours}</span>
                 </li>
               ))}
             </ul>
-            <p>Fitness adhérents : 24 h/24 · Jours fériés : réception fermée, pas de cours collectifs.</p>
+            <p>{contact.hoursNote}</p>
           </div>
         </div>
 
@@ -66,8 +61,8 @@ export default function Contact() {
           {sent ? (
             <div className="contact__card contact__success">
               <div className="contact__success-ic"><Icon name="check" size={28} stroke={2} /></div>
-              <h3>Message envoyé</h3>
-              <p>Notre équipe vous recontacte très vite pour planifier votre essai de 3 jours.</p>
+              <h3>{contact.successTitle}</h3>
+              <p>{contact.successMessage}</p>
               <button className="btn btn--dark" type="button" onClick={() => setSent(false)}>
                 Nouveau message
               </button>
@@ -75,8 +70,8 @@ export default function Contact() {
           ) : (
             <form className="contact__card contact__form" onSubmit={handleSubmit}>
               <div className="contact__form-head">
-                <h3>Demande d’essai gratuit</h3>
-                <p>Sans engagement</p>
+                <h3>{contact.formTitle}</h3>
+                <p>{contact.formSubtitle}</p>
               </div>
 
               <div className="contact__fields">

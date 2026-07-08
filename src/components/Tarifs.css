@@ -398,3 +398,96 @@
   }
   .tarifs-modal__actions { flex-direction: column; }
 }
+
+/* ---- Formulaire d'inscription ---- */
+.insc-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.insc-form__marital {
+  display: flex;
+  gap: 12px;
+}
+
+.insc-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-pill);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.insc-radio.is-on {
+  border-color: var(--purple);
+  background: var(--purple-soft);
+  color: var(--purple-700);
+  font-weight: 600;
+}
+.insc-radio input { accent-color: var(--purple); }
+
+.insc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.insc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.insc-field__label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.insc-field input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  font: inherit;
+  font-size: 0.92rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.insc-field input:focus {
+  outline: none;
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+}
+.insc-field.is-error input { border-color: #dc2626; }
+
+.insc-hint { font-size: 0.76rem; color: var(--muted); }
+.insc-err { font-size: 0.76rem; color: #dc2626; font-weight: 500; }
+
+.insc-conditions {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.insc-conditions input { margin-top: 3px; accent-color: var(--purple); }
+.insc-conditions a { color: var(--purple-700); text-decoration: underline; }
+.insc-conditions.is-error { color: #dc2626; }
+
+.insc-submit-error {
+  padding: 12px 14px;
+  border-radius: var(--r-sm);
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 0.88rem;
+}
+
+@media (max-width: 520px) {
+  .insc-grid { grid-template-columns: 1fr; }
+}

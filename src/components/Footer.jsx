@@ -1,21 +1,11 @@
+import { Link } from 'react-router-dom'
+import { useContent } from '../context/ContentContext'
 import './Footer.css'
 
-const COLS = [
-  {
-    title: 'Le centre',
-    links: ['À propos', 'Nos coachs', 'Équipements', 'Recrutement'],
-  },
-  {
-    title: 'Activités',
-    links: ['Cours collectifs', 'Bien-être', 'Musculation', 'Coaching'],
-  },
-  {
-    title: 'Infos',
-    links: ['Tarifs', 'FAQ', 'Contact'],
-  },
-]
-
 export default function Footer() {
+  const { content } = useContent()
+  const { footer, contact, site } = content
+
   return (
     <footer className="footer">
       <div className="container">
@@ -23,22 +13,21 @@ export default function Footer() {
           <div className="footer__brand">
             <a href="#top" className="brand brand--footer">
               <span className="brand__logo" aria-hidden="true">
-                <img src="/logo.png" alt="" />
+                <img src={site.logo} alt="" />
               </span>
-              <span className="brand__word">GreenFit</span>
+              <span className="brand__word">{site.name}</span>
             </a>
-            <p>Votre centre de bien-être à Salquenen / Sierre. Plus de 2 000 m²
-              dédiés à la forme, la santé et le rétablissement.</p>
+            <p>{footer.tagline}</p>
             <address className="footer__contact">
-              Industriestrasse 16<br />
-              3970 Salquenen / Sierre<br />
-              <a href="tel:+41275654131">027 565 41 31</a><br />
-              <a href="mailto:info@green-fit.ch">info@green-fit.ch</a>
+              {contact.addressLine1}<br />
+              {contact.addressLine2}<br />
+              <a href={contact.phoneHref}>{contact.phone}</a><br />
+              <a href={`mailto:${contact.email}`}>{contact.email}</a>
             </address>
           </div>
 
           <div className="footer__cols">
-            {COLS.map((c) => (
+            {footer.columns.map((c) => (
               <div className="footer__col" key={c.title}>
                 <h4>{c.title}</h4>
                 <ul>
@@ -52,11 +41,12 @@ export default function Footer() {
         </div>
 
         <div className="footer__bottom">
-          <p>© {new Date().getFullYear()} GreenFit. Tous droits réservés.</p>
+          <p>© {new Date().getFullYear()} {site.name}. Tous droits réservés.</p>
           <div className="footer__legal">
             <a href="#">Mentions légales</a>
             <a href="#">Confidentialité</a>
             <a href="#">CGV</a>
+            <Link to="/admin" className="footer__admin-link">Admin</Link>
           </div>
         </div>
       </div>

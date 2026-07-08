@@ -1,54 +1,9 @@
 import { useState } from 'react'
+import { useContent } from '../context/ContentContext'
 import Icon from './Icon'
 import './Planning.css'
 
-const TYPES = {
-  caf: { label: 'CAF', tone: 'green', icon: 'pulse' },
-  pump: { label: 'Body Pump', tone: 'purple', icon: 'strength' },
-  yoga: { label: 'Yoga', tone: 'green', icon: 'person' },
-  fstrength: { label: 'F. Strength', tone: 'slate', icon: 'strength' },
-  attack: { label: 'Body Attack', tone: 'purple', icon: 'pulse' },
-  pilates: { label: 'Pilates', tone: 'green', icon: 'wellness' },
-  functional: { label: 'Functional', tone: 'slate', icon: 'spark' },
-}
-
-const CATEGORIES = [
-  { key: 'all', label: 'Tout' },
-  { key: 'pump', label: 'Body Pump' },
-  { key: 'yoga', label: 'Yoga' },
-  { key: 'pilates', label: 'Pilates' },
-  { key: 'functional', label: 'Functional' },
-  { key: 'attack', label: 'Body Attack' },
-  { key: 'caf', label: 'CAF' },
-  { key: 'fstrength', label: 'F. Strength' },
-]
-
-const SLOTS = [
-  { key: 'morning', label: 'Matin' },
-  { key: 'midday', label: 'Midi' },
-  { key: 'evening', label: 'Soir' },
-]
-
 const DAY_NAMES = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
-
-const s = (type, start, end) => ({ type, start, end })
-
-const SCHEDULE = [
-  // Lundi
-  { morning: s('caf', '09:30', '10:30'), midday: null, evening: s('pump', '18:30', '19:30') },
-  // Mardi
-  { morning: s('yoga', '09:30', '11:00'), midday: s('fstrength', '12:15', '13:00'), evening: s('attack', '18:30', '19:30') },
-  // Mercredi
-  { morning: s('pilates', '09:30', '10:30'), midday: null, evening: s('functional', '18:30', '19:15') },
-  // Jeudi
-  { morning: s('pump', '09:30', '10:30'), midday: s('functional', '12:15', '13:00'), evening: s('pump', '18:30', '19:30') },
-  // Vendredi
-  { morning: null, midday: null, evening: null },
-  // Samedi
-  { morning: s('pump', '09:30', '10:30'), midday: null, evening: null },
-  // Dimanche
-  { morning: null, midday: null, evening: null },
-]
 
 function getCurrentMonday() {
   const now = new Date()
@@ -69,11 +24,15 @@ function getWeekDates(offset) {
   })
 }
 
-function sessionMatches(s, category) {
-  return s && (category === 'all' || s.type === category)
+function sessionMatches(session, category) {
+  return session && (category === 'all' || session.type === category)
 }
 
 export default function Planning() {
+  const { content } = useContent()
+  const { planning } = content
+  const { types: TYPES, categories: CATEGORIES, slots: SLOTS, schedule: SCHEDULE } = planning
+
   const [category, setCategory] = useState('all')
   const [selectedDay, setSelectedDay] = useState(0)
   const [week, setWeek] = useState(0)
@@ -93,12 +52,9 @@ export default function Planning() {
 
       <div className="container">
         <div className="planning__head reveal">
-          <span className="planning__eyebrow">Cours collectifs</span>
-          <h2>Planning de la semaine</h2>
-          <p className="planning__sub">
-            Plus de 7 disciplines encadrées par nos coachs. Filtrez par
-            activité et réservez votre place en quelques clics.
-          </p>
+          <span className="planning__eyebrow">{planning.eyebrow}</span>
+          <h2>{planning.title}</h2>
+          <p className="planning__sub">{planning.subtitle}</p>
           <div className="planning__filters" role="tablist">
             {CATEGORIES.map((cat) => (
               <button
@@ -112,7 +68,6 @@ export default function Planning() {
           </div>
         </div>
 
-        {/* Desktop — grille semaine */}
         <div className="planning__calendar planning__calendar--desktop reveal">
           <button
             className="planning__nav"
@@ -179,7 +134,6 @@ export default function Planning() {
           </button>
         </div>
 
-        {/* Mobile — vue jour compacte */}
         <div className="planning__mobile reveal">
           <div className="planning__mobile-week">
             <button
@@ -219,9 +173,7 @@ export default function Planning() {
 
           <ul className="planning__mobile-list">
             {mobileSessions.length === 0 ? (
-              <li className="planning__mobile-empty">
-                Aucun cours pour ce filtre ce jour-là.
-              </li>
+              <li className="planning__mobile-empty">{planning.emptyMessage}</li>
             ) : (
               mobileSessions.map(({ slot, s: session, t }) => (
                 <li
@@ -244,10 +196,7 @@ export default function Planning() {
           </ul>
         </div>
 
-        <p className="planning__note reveal">
-          Réservez vos cours en un clin d’œil — <a href="#contact">téléchargez</a> notre
-          application pour une expérience fluide.
-        </p>
+        <p className="planning__note reveal">{planning.note}</p>
       </div>
     </section>
   )
