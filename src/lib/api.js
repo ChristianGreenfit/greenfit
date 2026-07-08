@@ -1,27 +1,13 @@
-const FUNCTIONS_URL = import.meta.env.VITE_FUNCTIONS_URL || ''
-const ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
-
 /**
  * Crée une commande et récupère l'URL de paiement Saferpay.
+ * Appelle la fonction serverless Vercel `/api/create-order` (même origine).
  * @returns {Promise<{redirectUrl?: string, orderId?: number, errors?: string[]}>}
  */
 export async function createOrder({ months, optionIds, client }) {
-  if (!FUNCTIONS_URL) {
-    return {
-      errors: [
-        "Le paiement n'est pas encore configuré (VITE_FUNCTIONS_URL manquant).",
-      ],
-    }
-  }
-
   try {
-    const res = await fetch(`${FUNCTIONS_URL}/create-order`, {
+    const res = await fetch('/api/create-order', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: ANON_KEY,
-        Authorization: `Bearer ${ANON_KEY}`,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ months, optionIds, client }),
     })
 
