@@ -33,8 +33,17 @@ export const config = {
   },
 
   email: {
-    resendApiKey: process.env.RESEND_API_KEY ?? "",
     adminEmail: process.env.ADMIN_EMAIL ?? "info@green-fit.ch",
     fromEmail: process.env.FROM_EMAIL ?? "info@green-fit.ch",
+  },
+
+  // SMTP (envoi des emails depuis la boîte info@green-fit.ch)
+  smtp: {
+    host: process.env.SMTP_HOST ?? "",
+    port: Number(process.env.SMTP_PORT ?? 587),
+    user: process.env.SMTP_USER ?? "",
+    pass: process.env.SMTP_PASS ?? "",
+    // true pour le port 465 (SSL), false pour 587 (STARTTLS)
+    secure: (process.env.SMTP_SECURE ?? "").toLowerCase() === "true",
   },
 };
