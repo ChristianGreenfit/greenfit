@@ -150,7 +150,16 @@ export default function AdminDashboard() {
 }
 
 function AdminShell({ onLogout }) {
-  const { content, hasChanges, updateSection, resetContent, markSaved } = useContent()
+  const {
+    content,
+    hasChanges,
+    updateSection,
+    resetContent,
+    saveContent,
+    saving,
+    loading,
+    loadError,
+  } = useContent()
   const [active, setActive] = useState('overview')
   const [toast, setToast] = useState(null)
   const [navOpen, setNavOpen] = useState(false)
@@ -162,24 +171,45 @@ function AdminShell({ onLogout }) {
     setTimeout(() => setToast(null), 5000)
   }
 
-  const handleSave = () => {
-    markSaved()
-    showToast(
-      'Modifications enregistrées',
-      'Elles sont sauvées sur cet ordinateur. Ouvrez le site dans le même navigateur pour les voir. La sauvegarde cloud arrive bientôt.',
-    )
+  const handleSave = async () => {
+    try {
+      await saveContent()
+      showToast(
+        'Enregistré sur Supabase',
+        'Les modifications sont en ligne pour tous les visiteurs du site.',
+      )
+    } catch (err) {
+      showToast('Échec de l’enregistrement', err.message || 'Réessayez dans un instant.')
+    }
   }
 
   const handleReset = () => {
-    if (window.confirm('Remettre tout le contenu comme au départ ? Les changements locaux seront perdus.')) {
+    if (
+      window.confirm(
+        'Remettre le contenu aux valeurs d’origine sur cet écran ?\nPensez ensuite à cliquer sur Enregistrer pour publier sur le site.',
+      )
+    ) {
       resetContent()
-      showToast('Contenu remis à zéro', 'Tout a été remis aux valeurs d’origine.')
+      showToast(
+        'Valeurs d’origine chargées',
+        'Cliquez sur Enregistrer pour publier ces valeurs sur le site.',
+      )
     }
   }
 
   const goSection = (id) => {
     setActive(id)
     setNavOpen(false)
+  }
+
+  if (loading) {
+    return (
+      <div className="admin-login">
+        <div className="admin-login__card admin-login__card--loading">
+          <p>Chargement du contenu depuis Supabase…</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -189,7 +219,7 @@ function AdminShell({ onLogout }) {
           <img src={content.site.logo} alt="" />
           <div>
             <strong>GreenFit</strong>
-            <span>Modifier le site</span>
+            <span>modifier le site</span>
           </div>
         </div>
 
@@ -247,16 +277,35 @@ function AdminShell({ onLogout }) {
           </div>
           <div className="admin__topbar-actions">
             <span className={`admin__badge ${hasChanges ? '' : 'is-clean'}`}>
-              {hasChanges ? '● Pas encore enregistré' : '● Enregistré'}
+              {hasChanges ? '● Modifications non publiées' : '● Publié sur Supabase'}
             </span>
-            <button type="button" className="admin__btn admin__btn--ghost" onClick={handleReset}>
+            <button
+              type="button"
+              className="admin__btn admin__btn--ghost"
+              onClick={handleReset}
+              disabled={saving}
+            >
               Tout annuler
             </button>
-            <button type="button" className="admin__btn admin__btn--primary" onClick={handleSave}>
-              Enregistrer
+            <button
+              type="button"
+              className="admin__btn admin__btn--primary"
+              onClick={handleSave}
+              disabled={saving || !hasChanges}
+            >
+              {saving ? 'Publication…' : 'Enregistrer'}
             </button>
           </div>
         </header>
+
+        {loadError && (
+          <div className="admin__content" style={{ paddingBottom: 0 }}>
+            <div className="admin__info" style={{ background: '#fee2e2', color: '#b91c1c' }}>
+              <h3>Chargement cloud incomplet</h3>
+              <p>{loadError} — affichage des valeurs par défaut pour l’instant.</p>
+            </div>
+          </div>
+        )}
 
         <div className="admin__content">
           {active === 'overview' && <OverviewSection content={content} onNavigate={goSection} />}
@@ -284,13 +333,15 @@ function OverviewSection({ content, onNavigate }) {
         <ol>
           <li>Choisissez une section à gauche (ou ci-dessous).</li>
           <li>Modifiez les textes, prix ou horaires.</li>
-          <li>Cliquez sur <strong>Enregistrer</strong> en haut à droite.</li>
           <li>
-            Ouvrez <strong>Voir le site</strong> pour vérifier le résultat.
+            Cliquez sur <strong>Enregistrer</strong> pour publier sur <strong>Supabase</strong>.
+          </li>
+          <li>
+            Ouvrez <strong>Voir le site</strong> — tous les visiteurs voient la mise à jour.
           </li>
         </ol>
         <p className="admin__info-note">
-          Astuce : restez sur le même ordinateur et le même navigateur pour voir vos changements.
+          Les changements ne sont visibles en ligne qu’après un clic sur Enregistrer.
         </p>
       </div>
 
