@@ -1,4 +1,11 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { defaultContent } from '../data/defaultContent'
 import { normalizePlanning } from '../lib/planning'
 import { getAdminToken } from '../admin/adminAuth'
@@ -9,32 +16,8 @@ function deepClone(obj) {
   return JSON.parse(JSON.stringify(obj))
 }
 
-function deepMerge(base, overlay) {
-  if (!overlay || typeof overlay !== 'object' || Array.isArray(overlay)) {
-    return overlay === undefined ? base : overlay
-  }
-  const out = { ...base }
-  for (const key of Object.keys(overlay)) {
-    const b = base?.[key]
-    const o = overlay[key]
-    if (
-      b &&
-      o &&
-      typeof b === 'object' &&
-      typeof o === 'object' &&
-      !Array.isArray(b) &&
-      !Array.isArray(o)
-    ) {
-      out[key] = deepMerge(b, o)
-    } else if (o !== undefined) {
-      out[key] = o
-    }
-  }
-  return out
-}
-
 function normalizeContent(raw) {
-  const content = deepClone(raw)
+  const content = deepClone(raw || defaultContent)
   if (content.planning) {
     content.planning = normalizePlanning(content.planning)
   }
@@ -45,31 +28,27 @@ export function ContentProvider({ children }) {
   const [content, setContent] = useState(() => normalizeContent(defaultContent))
   const [hasChanges, setHasChanges] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
   const [loadError, setLoadError] = useState('')
-  const [updatedAt, setUpdatedAt] = useState(null)
+  const [saving, setSaving] = useState(false)
 
+  // Charge le contenu depuis Supabase (via /api/content)
   useEffect(() => {
     let cancelled = false
     ;(async () => {
-      setLoading(true)
-      setLoadError('')
       try {
         const res = await fetch('/api/content')
         const data = await res.json().catch(() => ({}))
         if (!res.ok) throw new Error(data.error || 'Chargement impossible')
-        if (cancelled) return
-        if (data.content) {
-          setContent(normalizeContent(deepMerge(defaultContent, data.content)))
-          setUpdatedAt(data.updatedAt || null)
-        } else {
-          setContent(normalizeContent(defaultContent))
-          setUpdatedAt(null)
+        if (!cancelled && data.content) {
+          setContent(normalizeContent(data.content))
+          setHasChanges(false)
+          setLoadError('')
         }
-        setHasChanges(false)
       } catch (err) {
         if (!cancelled) {
-          setLoadError(err.message || 'Erreur de chargement')
+          console.error('[content] load:', err)
+          setLoadError(String(err.message || err))
+          // Fallback : défauts du code
           setContent(normalizeContent(defaultContent))
         }
       } finally {
@@ -92,10 +71,15 @@ export function ContentProvider({ children }) {
     setHasChanges(true)
   }, [])
 
+  const resetContent = useCallback(() => {
+    setContent(normalizeContent(defaultContent))
+    setHasChanges(true)
+  }, [])
+
   const saveContent = useCallback(async () => {
     const token = getAdminToken()
     if (!token) {
-      throw new Error('Connectez-vous à l’admin pour enregistrer')
+      throw new Error('Session admin expirée — reconnectez-vous.')
     }
     setSaving(true)
     try {
@@ -108,43 +92,36 @@ export function ContentProvider({ children }) {
         body: JSON.stringify({ content }),
       })
       const data = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(data.error || 'Enregistrement impossible')
+      if (!res.ok) {
+        throw new Error(data.error || 'Sauvegarde impossible')
+      }
       setHasChanges(false)
-      setUpdatedAt(data.updatedAt || new Date().toISOString())
       return true
     } finally {
       setSaving(false)
     }
   }, [content])
 
-  const resetContent = useCallback(async () => {
-    const fresh = normalizeContent(defaultContent)
-    setContent(fresh)
-    setHasChanges(true)
-  }, [])
-
   const value = useMemo(
     () => ({
       content,
       hasChanges,
       loading,
-      saving,
       loadError,
-      updatedAt,
+      saving,
       updateSection,
-      saveContent,
       resetContent,
+      saveContent,
     }),
     [
       content,
       hasChanges,
       loading,
-      saving,
       loadError,
-      updatedAt,
+      saving,
       updateSection,
-      saveContent,
       resetContent,
+      saveContent,
     ],
   )
 
