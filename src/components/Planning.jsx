@@ -16,6 +16,12 @@ function getCurrentMonday() {
   return mon
 }
 
+function getTodayWeekIndex() {
+  // Lundi = 0 … Dimanche = 6
+  const jsDay = new Date().getDay() // Dim=0 … Sam=6
+  return jsDay === 0 ? 6 : jsDay - 1
+}
+
 function getWeekDates(offset) {
   const monday = getCurrentMonday()
   return DAY_NAMES.map((name, i) => {
@@ -35,10 +41,11 @@ export default function Planning() {
   const { types: TYPES, categories: CATEGORIES, schedule: SCHEDULE } = planning
 
   const [category, setCategory] = useState('all')
-  const [selectedDay, setSelectedDay] = useState(0)
+  const [selectedDay, setSelectedDay] = useState(getTodayWeekIndex)
   const [week, setWeek] = useState(0)
 
   const dates = getWeekDates(week)
+  const todayIndex = week === 0 ? getTodayWeekIndex() : -1
 
   const sessionsForDay = (dayIndex) =>
     sortSessions(
@@ -84,7 +91,7 @@ export default function Planning() {
               {dates.map((d, di) => (
                 <button
                   key={`h-${di}`}
-                  className={`planning__day ${selectedDay === di ? 'is-selected' : ''}`}
+                  className={`planning__day ${selectedDay === di ? 'is-selected' : ''} ${todayIndex === di ? 'is-today' : ''}`}
                   onClick={() => setSelectedDay(di)}
                 >
                   <span className="planning__day-name">{d.name}</span>
@@ -95,10 +102,11 @@ export default function Planning() {
               {dates.map((_, di) => {
                 const sessions = sessionsForDay(di)
                 const selCol = selectedDay === di ? 'is-selcol' : ''
+                const todayCol = todayIndex === di ? 'is-todaycol' : ''
                 return (
                   <div
                     key={`c-${di}`}
-                    className={`planning__daycol ${selCol} ${sessions.length === 0 ? 'is-empty' : ''}`}
+                    className={`planning__daycol ${selCol} ${todayCol} ${sessions.length === 0 ? 'is-empty' : ''}`}
                   >
                     {sessions.length === 0 ? (
                       <div className="planning__cell is-empty">
@@ -169,7 +177,7 @@ export default function Planning() {
               <button
                 key={di}
                 type="button"
-                className={`planning__mobile-day ${selectedDay === di ? 'is-selected' : ''}`}
+                className={`planning__mobile-day ${selectedDay === di ? 'is-selected' : ''} ${todayIndex === di ? 'is-today' : ''}`}
                 onClick={() => setSelectedDay(di)}
               >
                 <span>{d.name}</span>

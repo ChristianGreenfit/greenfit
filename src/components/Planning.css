@@ -125,6 +125,10 @@
   background: var(--bg-soft);
 }
 
+.planning__daycol.is-todaycol:not(.is-selcol) {
+  background: rgba(124, 58, 237, 0.04);
+}
+
 .planning__daycol .planning__cell {
   height: auto;
   min-height: 96px;
@@ -154,6 +158,15 @@
   font-weight: 700;
 }
 .planning__day.is-selected .planning__day-name { font-weight: 700; }
+
+.planning__day.is-today {
+  background: var(--bg-soft);
+  color: var(--ink);
+  border-top-color: var(--ink);
+}
+.planning__day.is-today:not(.is-selected) {
+  border-top-color: var(--purple);
+}
 
 .planning__timecol {
   display: flex;
@@ -328,6 +341,11 @@
   .planning__mobile-day.is-selected {
     border-color: var(--ink);
     background: var(--bg-soft);
+    color: var(--ink);
+  }
+
+  .planning__mobile-day.is-today:not(.is-selected) {
+    border-color: var(--purple);
     color: var(--ink);
   }
 
