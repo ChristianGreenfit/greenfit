@@ -67,7 +67,7 @@ function siteBase() {
 }
 
 function logoUrl() {
-  return `${siteBase()}/logo.png`;
+  return `${siteBase()}/logo-mark.png`;
 }
 
 function layout({ title, preheader, body }) {
@@ -94,11 +94,18 @@ function layout({ title, preheader, body }) {
 
         <!-- Logo -->
         <tr>
-          <td align="center" style="padding:28px 24px 8px;">
-            <a href="${esc(siteBase())}" target="_blank" style="text-decoration:none;">
-              <img src="${esc(logoUrl())}" alt="GreenFit" width="56" height="56" style="display:block;border:0;height:56px;width:auto;" />
-            </a>
-            <div style="font-family:'Sora',Arial,Helvetica,sans-serif;font-size:18px;font-weight:700;letter-spacing:-0.02em;color:${BRAND.ink};margin-top:10px;">GreenFit</div>
+          <td align="center" style="padding:28px 24px 12px;text-align:center;">
+            <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
+              <tr>
+                <td align="center" style="text-align:center;">
+                  <a href="${esc(siteBase())}" target="_blank" style="text-decoration:none;display:inline-block;">
+                    <img src="${esc(logoUrl())}" alt="GreenFit" width="64" height="64"
+                      style="display:block;margin:0 auto;border:0;outline:none;width:64px;height:64px;" />
+                  </a>
+                  <div style="font-family:'Sora',Arial,Helvetica,sans-serif;font-size:18px;font-weight:700;letter-spacing:-0.02em;color:${BRAND.ink};margin-top:10px;text-align:center;">GreenFit</div>
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
 
