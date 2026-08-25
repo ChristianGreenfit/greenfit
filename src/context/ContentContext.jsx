@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { defaultContent } from '../data/defaultContent'
+import { normalizePlanning } from '../lib/planning'
 
 const ContentContext = createContext(null)
 const STORAGE_KEY = 'greenfit-content-draft'
@@ -8,14 +9,22 @@ function deepClone(obj) {
   return JSON.parse(JSON.stringify(obj))
 }
 
+function normalizeContent(raw) {
+  const content = deepClone(raw)
+  if (content.planning) {
+    content.planning = normalizePlanning(content.planning)
+  }
+  return content
+}
+
 function loadInitialContent() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) return JSON.parse(saved)
+    if (saved) return normalizeContent(JSON.parse(saved))
   } catch {
     /* ignore invalid draft */
   }
-  return deepClone(defaultContent)
+  return normalizeContent(defaultContent)
 }
 
 export function ContentProvider({ children }) {
@@ -29,14 +38,16 @@ export function ContentProvider({ children }) {
   const updateSection = useCallback((section, updater) => {
     setContent((prev) => {
       const next = deepClone(prev)
-      next[section] = typeof updater === 'function' ? updater(prev[section]) : updater
+      let value = typeof updater === 'function' ? updater(prev[section]) : updater
+      if (section === 'planning') value = normalizePlanning(value)
+      next[section] = value
       return next
     })
     setHasChanges(true)
   }, [])
 
   const resetContent = useCallback(() => {
-    const fresh = deepClone(defaultContent)
+    const fresh = normalizeContent(defaultContent)
     setContent(fresh)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh))
     setHasChanges(false)

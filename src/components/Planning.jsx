@@ -31,19 +31,21 @@ function sessionMatches(session, category) {
 export default function Planning() {
   const { content } = useContent()
   const { planning } = content
-  const { types: TYPES, categories: CATEGORIES, slots: SLOTS, schedule: SCHEDULE } = planning
+  const { types: TYPES, categories: CATEGORIES, schedule: SCHEDULE } = planning
 
   const [category, setCategory] = useState('all')
   const [selectedDay, setSelectedDay] = useState(0)
   const [week, setWeek] = useState(0)
 
   const dates = getWeekDates(week)
-  const mobileSessions = SLOTS.flatMap((slot) => {
-    const session = SCHEDULE[selectedDay][slot.key]
-    if (!sessionMatches(session, category)) return []
-    const t = TYPES[session.type]
-    return [{ slot, s: session, t }]
-  })
+
+  const sessionsForDay = (dayIndex) =>
+    (SCHEDULE[dayIndex] || [])
+      .filter((s) => sessionMatches(s, category) && TYPES[s.type])
+      .slice()
+      .sort((a, b) => String(a.start).localeCompare(String(b.start)))
+
+  const mobileSessions = sessionsForDay(selectedDay)
 
   return (
     <section className="section planning" id="planning">
@@ -78,11 +80,10 @@ export default function Planning() {
           </button>
 
           <div className="planning__scroll">
-            <div className="planning__grid">
-              <div className="planning__corner" />
+            <div className="planning__grid planning__grid--days">
               {dates.map((d, di) => (
                 <button
-                  key={di}
+                  key={`h-${di}`}
                   className={`planning__day ${selectedDay === di ? 'is-selected' : ''}`}
                   onClick={() => setSelectedDay(di)}
                 >
@@ -91,37 +92,43 @@ export default function Planning() {
                 </button>
               ))}
 
-              {SLOTS.map((slot) => (
-                <div className="planning__rowgroup" key={slot.key} style={{ display: 'contents' }}>
-                  <div className="planning__timecol">{slot.label}</div>
-                  {dates.map((_, di) => {
-                    const session = SCHEDULE[di][slot.key]
-                    const matches = sessionMatches(session, category)
-                    const selCol = selectedDay === di ? 'is-selcol' : ''
-
-                    if (!session || !matches) {
-                      return <div className={`planning__cell is-empty ${selCol}`} key={di} />
-                    }
-
-                    const t = TYPES[session.type]
-                    return (
-                      <div
-                        className={`planning__cell tone-${t.tone} ${selCol}`}
-                        key={di}
-                      >
-                        <span className="planning__cell-icon">
-                          <Icon name={t.icon} size={16} />
-                        </span>
-                        <span className="planning__cell-name">{t.label}</span>
-                        <span className="planning__cell-spots">
-                          <Icon name="clock" size={13} />
-                          {session.start} – {session.end}
+              {dates.map((_, di) => {
+                const sessions = sessionsForDay(di)
+                const selCol = selectedDay === di ? 'is-selcol' : ''
+                return (
+                  <div
+                    key={`c-${di}`}
+                    className={`planning__daycol ${selCol} ${sessions.length === 0 ? 'is-empty' : ''}`}
+                  >
+                    {sessions.length === 0 ? (
+                      <div className="planning__cell is-empty">
+                        <span className="planning__cell-name" style={{ color: 'var(--muted)', fontWeight: 500 }}>
+                          —
                         </span>
                       </div>
-                    )
-                  })}
-                </div>
-              ))}
+                    ) : (
+                      sessions.map((session, si) => {
+                        const t = TYPES[session.type]
+                        return (
+                          <div
+                            className={`planning__cell tone-${t.tone}`}
+                            key={`${session.type}-${session.start}-${si}`}
+                          >
+                            <span className="planning__cell-icon">
+                              <Icon name={t.icon} size={16} />
+                            </span>
+                            <span className="planning__cell-name">{t.label}</span>
+                            <span className="planning__cell-spots">
+                              <Icon name="clock" size={13} />
+                              {session.start} – {session.end}
+                            </span>
+                          </div>
+                        )
+                      })
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
 
@@ -175,23 +182,26 @@ export default function Planning() {
             {mobileSessions.length === 0 ? (
               <li className="planning__mobile-empty">{planning.emptyMessage}</li>
             ) : (
-              mobileSessions.map(({ slot, s: session, t }) => (
-                <li
-                  key={slot.key}
-                  className={`planning__mobile-item tone-${t.tone}`}
-                >
-                  <span className="planning__mobile-time">{session.start}</span>
-                  <div className="planning__mobile-body">
-                    <div>
-                      <strong>{t.label}</strong>
-                      <span>
-                        <Icon name="clock" size={12} />
-                        {session.start} – {session.end}
-                      </span>
+              mobileSessions.map((session, i) => {
+                const t = TYPES[session.type]
+                return (
+                  <li
+                    key={`${session.type}-${session.start}-${i}`}
+                    className={`planning__mobile-item tone-${t.tone}`}
+                  >
+                    <span className="planning__mobile-time">{session.start}</span>
+                    <div className="planning__mobile-body">
+                      <div>
+                        <strong>{t.label}</strong>
+                        <span>
+                          <Icon name="clock" size={12} />
+                          {session.start} – {session.end}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </li>
-              ))
+                  </li>
+                )
+              })
             )}
           </ul>
         </div>

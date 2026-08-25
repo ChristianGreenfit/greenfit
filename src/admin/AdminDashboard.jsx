@@ -604,38 +604,12 @@ function PlanningSection({ content, updateSection }) {
 
   const update = (patch) => updateSection('planning', (prev) => ({ ...prev, ...patch }))
 
-  const updateSession = (dayIndex, slotKey, field, value) =>
-    updateSection('planning', (prev) => {
-      const schedule = prev.schedule.map((day, di) => {
-        if (di !== dayIndex) return day
-        const slot = day[slotKey]
-        if (field === 'type' && value === '') {
-          return { ...day, [slotKey]: null }
-        }
-        if (!slot) {
-          const defaults = {
-            morning: { start: '09:30', end: '10:30' },
-            midday: { start: '12:15', end: '13:00' },
-            evening: { start: '18:30', end: '19:30' },
-          }
-          const d = defaults[slotKey] || { start: '09:30', end: '10:30' }
-          return {
-            ...day,
-            [slotKey]: { type: value, start: d.start, end: d.end },
-          }
-        }
-        return { ...day, [slotKey]: { ...slot, [field]: value } }
-      })
-      return { ...prev, schedule }
-    })
-
   const updateType = (key, field, value) =>
     updateSection('planning', (prev) => {
       const types = {
         ...prev.types,
         [key]: { ...prev.types[key], [field]: value },
       }
-      // Garder les filtres du site alignés avec le nom du cours
       const categories = prev.categories.map((cat) =>
         cat.key === key ? { ...cat, label: field === 'label' ? value : cat.label } : cat,
       )
@@ -666,10 +640,7 @@ function PlanningSection({ content, updateSection }) {
         ...prev.types,
         [key]: { label: clean, tone: 'green', icon: 'pulse' },
       },
-      categories: [
-        ...prev.categories,
-        { key, label: clean },
-      ],
+      categories: [...prev.categories, { key, label: clean }],
     }))
   }
 
@@ -677,7 +648,7 @@ function PlanningSection({ content, updateSection }) {
     const name = planning.types[key]?.label || key
     if (
       !window.confirm(
-        `Supprimer le cours « ${name} » ?\nLes créneaux qui l’utilisent seront vidés.`,
+        `Supprimer le cours « ${name} » ?\nIl sera aussi retiré du planning de la semaine.`,
       )
     ) {
       return
@@ -686,18 +657,54 @@ function PlanningSection({ content, updateSection }) {
       const types = { ...prev.types }
       delete types[key]
       const categories = prev.categories.filter((c) => c.key !== key)
-      const schedule = prev.schedule.map((day) => {
-        const next = { ...day }
-        for (const slot of prev.slots) {
-          if (next[slot.key]?.type === key) next[slot.key] = null
-        }
-        return next
-      })
+      const schedule = prev.schedule.map((day) =>
+        (Array.isArray(day) ? day : []).filter((s) => s.type !== key),
+      )
       return { ...prev, types, categories, schedule }
     })
   }
 
-  const day = planning.schedule[activeDay]
+  const daySessions = Array.isArray(planning.schedule[activeDay])
+    ? planning.schedule[activeDay]
+    : []
+
+  const updateDaySession = (sessionIndex, field, value) =>
+    updateSection('planning', (prev) => {
+      const schedule = prev.schedule.map((day, di) => {
+        if (di !== activeDay) return day
+        const list = (Array.isArray(day) ? day : []).map((s, i) =>
+          i === sessionIndex ? { ...s, [field]: value } : s,
+        )
+        return list.sort((a, b) => String(a.start).localeCompare(String(b.start)))
+      })
+      return { ...prev, schedule }
+    })
+
+  const addDaySession = () => {
+    const firstType = typeKeys[0]
+    if (!firstType) {
+      window.alert('Ajoutez d’abord un cours dans « Mes cours ».')
+      return
+    }
+    updateSection('planning', (prev) => {
+      const schedule = prev.schedule.map((day, di) => {
+        if (di !== activeDay) return day
+        const list = Array.isArray(day) ? [...day] : []
+        list.push({ type: firstType, start: '18:30', end: '19:30' })
+        return list.sort((a, b) => String(a.start).localeCompare(String(b.start)))
+      })
+      return { ...prev, schedule }
+    })
+  }
+
+  const removeDaySession = (sessionIndex) =>
+    updateSection('planning', (prev) => {
+      const schedule = prev.schedule.map((day, di) => {
+        if (di !== activeDay) return day
+        return (Array.isArray(day) ? day : []).filter((_, i) => i !== sessionIndex)
+      })
+      return { ...prev, schedule }
+    })
 
   return (
     <>
@@ -705,10 +712,10 @@ function PlanningSection({ content, updateSection }) {
         <h3>Comment gérer le planning</h3>
         <ol>
           <li>
-            Créez d’abord vos <strong>cours</strong> (ex. Yoga, Body Pump).
+            Créez vos <strong>cours</strong> (Yoga, Body Pump…).
           </li>
           <li>
-            Ensuite, choisissez un <strong>jour</strong> et placez un cours le matin, midi ou soir.
+            Choisissez un <strong>jour</strong>, puis ajoutez ou retirez des créneaux librement.
           </li>
         </ol>
       </div>
@@ -732,7 +739,7 @@ function PlanningSection({ content, updateSection }) {
 
       <Panel
         title="Mes cours"
-        description="Liste des activités. Ajoutez un cours ici avant de le placer dans la semaine."
+        description="Catalogue des activités. Créez-les ici avant de les placer dans la semaine."
       >
         <div className="admin__type-list">
           {typeKeys.map((key) => (
@@ -786,7 +793,7 @@ function PlanningSection({ content, updateSection }) {
 
       <Panel
         title="Planning de la semaine"
-        description="Choisissez un jour, puis indiquez s’il y a un cours le matin, à midi et/ou le soir."
+        description="Choisissez un jour, puis ajoutez autant de cours que vous voulez (ou retirez-en)."
       >
         <div className="admin__day-tabs" role="tablist" aria-label="Jour de la semaine">
           {DAY_NAMES.map((name, i) => (
@@ -799,73 +806,72 @@ function PlanningSection({ content, updateSection }) {
               onClick={() => setActiveDay(i)}
             >
               {name}
+              {Array.isArray(planning.schedule[i]) && planning.schedule[i].length > 0 && (
+                <span className="admin__day-count">{planning.schedule[i].length}</span>
+              )}
             </button>
           ))}
         </div>
 
-        <div className="admin__day-slots">
-          {planning.slots.map((slot) => {
-            const session = day?.[slot.key]
-            const hasCourse = Boolean(session)
-            return (
-              <div key={slot.key} className={`admin__slot-card ${hasCourse ? 'has-course' : ''}`}>
+        {daySessions.length === 0 ? (
+          <div className="admin__empty-day">
+            <p>Aucun cours ce jour-là.</p>
+          </div>
+        ) : (
+          <div className="admin__day-slots">
+            {daySessions.map((session, index) => (
+              <div key={`${session.type}-${session.start}-${index}`} className="admin__slot-card has-course">
                 <div className="admin__slot-head">
-                  <strong>{slot.label}</strong>
-                  <label className="admin__toggle">
-                    <input
-                      type="checkbox"
-                      checked={hasCourse}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          const firstType = typeKeys[0] || ''
-                          if (!firstType) {
-                            window.alert('Ajoutez d’abord un cours dans « Mes cours ».')
-                            return
-                          }
-                          updateSession(activeDay, slot.key, 'type', firstType)
-                        } else {
-                          updateSession(activeDay, slot.key, 'type', '')
-                        }
-                      }}
-                    />
-                    <span>{hasCourse ? 'Cours prévu' : 'Pas de cours'}</span>
-                  </label>
+                  <strong>Cours {index + 1}</strong>
+                  <button
+                    type="button"
+                    className="admin__btn admin__btn--danger admin__btn--sm"
+                    onClick={() => removeDaySession(index)}
+                  >
+                    Retirer
+                  </button>
                 </div>
-
-                {hasCourse && (
-                  <div className="admin__slot-fields">
-                    <Field label="Quel cours ?">
-                      <select
-                        value={session.type}
-                        onChange={(e) => updateSession(activeDay, slot.key, 'type', e.target.value)}
-                      >
-                        {typeKeys.map((key) => (
-                          <option key={key} value={key}>
-                            {planning.types[key].label}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-                    <Field label="Début">
-                      <input
-                        type="time"
-                        value={session.start}
-                        onChange={(e) => updateSession(activeDay, slot.key, 'start', e.target.value)}
-                      />
-                    </Field>
-                    <Field label="Fin">
-                      <input
-                        type="time"
-                        value={session.end}
-                        onChange={(e) => updateSession(activeDay, slot.key, 'end', e.target.value)}
-                      />
-                    </Field>
-                  </div>
-                )}
+                <div className="admin__slot-fields">
+                  <Field label="Quel cours ?">
+                    <select
+                      value={session.type}
+                      onChange={(e) => updateDaySession(index, 'type', e.target.value)}
+                    >
+                      {typeKeys.map((key) => (
+                        <option key={key} value={key}>
+                          {planning.types[key].label}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="Début">
+                    <input
+                      type="time"
+                      value={session.start}
+                      onChange={(e) => updateDaySession(index, 'start', e.target.value)}
+                    />
+                  </Field>
+                  <Field label="Fin">
+                    <input
+                      type="time"
+                      value={session.end}
+                      onChange={(e) => updateDaySession(index, 'end', e.target.value)}
+                    />
+                  </Field>
+                </div>
               </div>
-            )
-          })}
-        </div>
+            ))}
+          </div>
+        )}
+
+        <button
+          type="button"
+          className="admin__btn admin__btn--primary"
+          onClick={addDaySession}
+          style={{ marginTop: '0.85rem' }}
+        >
+          + Ajouter un cours ce jour
+        </button>
       </Panel>
     </>
   )

@@ -601,12 +601,42 @@
   font-size: 0.88rem;
   font-weight: 600;
   color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .admin__day-tab.is-active {
   background: var(--ink);
   border-color: var(--ink);
   color: #fff;
+}
+
+.admin__day-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.2rem;
+  height: 1.2rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: rgba(124, 58, 237, 0.15);
+  color: #5b21b6;
+  font-size: 0.72rem;
+}
+
+.admin__day-tab.is-active .admin__day-count {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.admin__empty-day {
+  padding: 1.25rem;
+  border: 1px dashed var(--admin-border);
+  border-radius: 14px;
+  text-align: center;
+  color: var(--admin-muted);
+  background: #fafbfa;
 }
 
 .admin__day-slots {

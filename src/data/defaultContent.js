@@ -138,33 +138,34 @@ export const defaultContent = {
       { key: 'evening', label: 'Soir' },
     ],
     schedule: [
-      {
-        morning: { type: 'caf', start: '09:30', end: '10:30' },
-        midday: null,
-        evening: { type: 'pump', start: '18:30', end: '19:30' },
-      },
-      {
-        morning: { type: 'yoga', start: '09:30', end: '11:00' },
-        midday: { type: 'fstrength', start: '12:15', end: '13:00' },
-        evening: { type: 'attack', start: '18:30', end: '19:30' },
-      },
-      {
-        morning: { type: 'pilates', start: '09:30', end: '10:30' },
-        midday: null,
-        evening: { type: 'functional', start: '18:30', end: '19:15' },
-      },
-      {
-        morning: { type: 'pump', start: '09:30', end: '10:30' },
-        midday: { type: 'functional', start: '12:15', end: '13:00' },
-        evening: { type: 'pump', start: '18:30', end: '19:30' },
-      },
-      { morning: null, midday: null, evening: null },
-      {
-        morning: { type: 'pump', start: '09:30', end: '10:30' },
-        midday: null,
-        evening: null,
-      },
-      { morning: null, midday: null, evening: null },
+      // Lundi
+      [
+        { type: 'caf', start: '09:30', end: '10:30' },
+        { type: 'pump', start: '18:30', end: '19:30' },
+      ],
+      // Mardi
+      [
+        { type: 'yoga', start: '09:30', end: '11:00' },
+        { type: 'fstrength', start: '12:15', end: '13:00' },
+        { type: 'attack', start: '18:30', end: '19:30' },
+      ],
+      // Mercredi
+      [
+        { type: 'pilates', start: '09:30', end: '10:30' },
+        { type: 'functional', start: '18:30', end: '19:15' },
+      ],
+      // Jeudi
+      [
+        { type: 'pump', start: '09:30', end: '10:30' },
+        { type: 'functional', start: '12:15', end: '13:00' },
+        { type: 'pump', start: '18:30', end: '19:30' },
+      ],
+      // Vendredi
+      [],
+      // Samedi
+      [{ type: 'pump', start: '09:30', end: '10:30' }],
+      // Dimanche
+      [],
     ],
   },
 

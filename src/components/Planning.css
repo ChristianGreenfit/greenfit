@@ -106,6 +106,30 @@
   min-width: 880px;
 }
 
+.planning__grid--days {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-rows: auto minmax(220px, auto);
+  align-items: start;
+}
+
+.planning__daycol {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 220px;
+  padding: 4px;
+  border-radius: var(--r-sm);
+}
+
+.planning__daycol.is-selcol {
+  background: var(--bg-soft);
+}
+
+.planning__daycol .planning__cell {
+  height: auto;
+  min-height: 96px;
+}
+
 .planning__corner { }
 
 .planning__day {
