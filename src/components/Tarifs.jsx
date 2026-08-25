@@ -26,41 +26,42 @@ function TarifReduitWarning({ plan, onContinue, onClose }) {
         onClick={onClose}
         aria-label="Fermer"
       />
-      <div className="tarifs-modal__panel tarifs-modal__panel--warn">
+      <div className="tarifs-modal__panel tarifs-warn-panel">
         <button type="button" className="tarifs-modal__close" onClick={onClose} aria-label="Fermer">
           ×
         </button>
 
-        <div className="tarifs-modal__head">
-          <span className="eyebrow">Avant de continuer</span>
-          <h3 id="tarif-warn-title">Tarifs réduits</h3>
-          <p className="tarifs-modal__plan-price">
-            {plan.name} · {plan.price} CHF
+        <div className="tarifs-warn-panel__head">
+          <p className="tarifs-warn-panel__plan">{plan.name}</p>
+          <h3 id="tarif-warn-title">Comment souhaitez-vous vous abonner&nbsp;?</h3>
+          <p className="tarifs-warn-panel__lead">
+            La réduction de 10&nbsp;% (AVS, étudiant, AI) n’est disponible qu’à la
+            réception, pas en paiement en ligne.
           </p>
         </div>
 
-        <div className="tarifs-warn">
-          <p>
-            Les <strong>tarifs réduits (−10&nbsp;%)</strong> pour AVS, étudiants et AI ne
-            s’appliquent <strong>pas au paiement en ligne</strong>.
-          </p>
-          <p>
-            Si vous avez droit à cette réduction, merci de venir vous abonner
-            <strong> directement à la réception</strong> du centre.
-          </p>
-          <p className="tarifs-warn__note">
-            En continuant en ligne, vous payez le tarif plein affiché.
-          </p>
-        </div>
-
-        <div className="tarifs-modal__actions">
-          <button type="button" className="btn btn--light" onClick={onClose}>
-            Annuler
+        <div className="tarifs-warn-panel__choices">
+          <button type="button" className="tarifs-warn-choice" onClick={onClose}>
+            <span className="tarifs-warn-choice__icon" aria-hidden="true">
+              <Icon name="pin" size={20} stroke={1.8} />
+            </span>
+            <span className="tarifs-warn-choice__body">
+              <strong>À la réception</strong>
+              <span>−10&nbsp;% avec justificatif</span>
+            </span>
           </button>
-          <button type="button" className="btn btn--primary" onClick={onContinue}>
-            Continuer en ligne
-            <span className="arrow">
-              <Icon name="arrow" size={15} stroke={2} />
+
+          <button
+            type="button"
+            className="tarifs-warn-choice tarifs-warn-choice--online"
+            onClick={onContinue}
+          >
+            <span className="tarifs-warn-choice__icon" aria-hidden="true">
+              <Icon name="arrow" size={20} stroke={1.8} />
+            </span>
+            <span className="tarifs-warn-choice__body">
+              <strong>En ligne</strong>
+              <span>Tarif plein · {plan.price} CHF</span>
             </span>
           </button>
         </div>

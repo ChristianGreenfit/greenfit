@@ -384,27 +384,121 @@
   justify-content: center;
 }
 
-.tarifs-warn {
+.tarifs-warn-panel {
+  max-width: 440px;
+  padding: 28px 26px 24px;
+}
+
+.tarifs-warn-panel__head {
+  padding-right: 28px;
+}
+
+.tarifs-warn-panel__plan {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--purple);
+  margin: 0 0 10px;
   text-align: left;
+}
+
+.tarifs-warn-panel__head h3 {
+  font-size: 1.35rem;
+  line-height: 1.2;
+  margin: 0 0 12px;
+  text-align: left;
+}
+
+.tarifs-warn-panel__lead {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  text-align: left;
+}
+
+.tarifs-warn-panel__choices {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
-  margin-top: 0.5rem;
+  gap: 10px;
+  margin-top: 22px;
 }
 
-.tarifs-warn p {
-  font-size: 0.98rem;
-  line-height: 1.55;
-  color: var(--ink-soft);
+.tarifs-warn-choice {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--white);
+  text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
 
-.tarifs-warn__note {
-  padding: 0.85rem 1rem;
+.tarifs-warn-choice:hover {
+  border-color: var(--purple);
+  background: var(--purple-soft);
+  box-shadow: var(--shadow-sm);
+}
+
+.tarifs-warn-choice__icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
   border-radius: 12px;
-  background: #f7f8f6;
-  border: 1px solid var(--line);
-  font-size: 0.92rem !important;
-  color: var(--muted) !important;
+  background: var(--bg-soft);
+  color: var(--ink-soft);
+  flex-shrink: 0;
+}
+
+.tarifs-warn-choice:hover .tarifs-warn-choice__icon {
+  background: var(--white);
+  color: var(--purple);
+}
+
+.tarifs-warn-choice__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tarifs-warn-choice__body strong {
+  font-family: var(--font-head);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.tarifs-warn-choice__body span {
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.tarifs-warn-choice--online {
+  border-color: var(--purple);
+  background: linear-gradient(120deg, #f8f5ff 0%, #f3fbf6 100%);
+}
+
+.tarifs-warn-choice--online .tarifs-warn-choice__icon {
+  background: var(--purple);
+  color: #fff;
+}
+
+.tarifs-warn-choice--online:hover {
+  background: linear-gradient(120deg, #f3effe 0%, #e9f9ef 100%);
+  box-shadow: var(--shadow-purple);
+}
+
+.tarifs-warn-choice--online:hover .tarifs-warn-choice__icon {
+  background: var(--purple-600);
+  color: #fff;
 }
 
 @media (max-width: 520px) {
