@@ -138,7 +138,7 @@ function sectionTitle(text) {
   return `<h2 style="margin:28px 0 12px;font-family:'Sora',Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;letter-spacing:-0.01em;color:${BRAND.ink};">${esc(text)}</h2>`;
 }
 
-function infoRow(rows) {
+function infoRows(rows) {
   const cells = rows
     .map(
       ([label, value], i) => `
@@ -335,4 +335,26 @@ export async function sendOrderEmails(d) {
       clientHtml(d),
     );
   }
+}
+
+/** Aperçu HTML (navigateur / diagnostic) — données d'exemple. */
+export function renderClientEmailPreview() {
+  return clientHtml({
+    orderId: 42,
+    contractId: "2016040507190991_2015012617502346",
+    title: "Abonnement 3 mois",
+    price: 429,
+    optionsList: [
+      "Programme personnalisé / Inbody analyse corporelle (CHF 60)",
+    ],
+    civilite: "Monsieur",
+    prenom: "Alex",
+    nom: "Dupont",
+    adresse: "Rue de l'Exemple 12",
+    npa: "3970",
+    ville: "Salquenen",
+    email: "alex.dupont@example.com",
+    telephone: "(+41)0791234567",
+    dateNaissance: "15.03.1992",
+  });
 }
