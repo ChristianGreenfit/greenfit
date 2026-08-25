@@ -9,7 +9,7 @@ const MESSAGES = {
     icon: 'check',
     tone: 'success',
     title: 'Paiement confirmé',
-    text: "Le paiement a bien été effectué, nous vous en remercions ! Vous recevrez sous peu un email de confirmation ainsi que vos identifiants de connexion. Nous nous réjouissons de vous accueillir chez Green-Fit !",
+    text: "Le paiement a bien été effectué, merci ! Vous allez recevoir un email de confirmation avec les prochaines étapes : venez à la réception pour récupérer votre carte d’accès. À bientôt chez GreenFit !",
   },
   fail: {
     icon: 'spark',

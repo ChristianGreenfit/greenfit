@@ -37,6 +37,9 @@ export const config = {
     fromEmail: process.env.FROM_EMAIL ?? "info@green-fit.ch",
   },
 
+  // URL publique du site (logo + liens dans les emails)
+  siteUrl: process.env.SITE_URL ?? "https://greenfit-nu.vercel.app",
+
   // SMTP (envoi des emails depuis la boîte info@green-fit.ch)
   smtp: {
     host: process.env.SMTP_HOST ?? "",
