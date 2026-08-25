@@ -5,7 +5,7 @@ Port du plugin WordPress `vv-abonnement` vers Supabase (Postgres + Edge Function
 ## Architecture
 
 ```
-Site React (Tarifs → InscriptionModal)
+Site React (Tarifs → /checkout)
         │  POST /create-order  { months, optionIds, client }
         ▼
 Edge Function create-order

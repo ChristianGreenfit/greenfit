@@ -1,10 +1,18 @@
 import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useContent } from '../context/ContentContext'
 import './Navbar.css'
+
+function homeHref(hash) {
+  const path = hash.startsWith('#') ? hash : `#${hash}`
+  return `/${path}`
+}
 
 export default function Navbar() {
   const { content } = useContent()
   const { nav, site } = content
+  const { pathname } = useLocation()
+  const onHome = pathname === '/'
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
 
@@ -19,10 +27,12 @@ export default function Navbar() {
     document.body.style.overflow = open ? 'hidden' : ''
   }, [open])
 
+  const linkHref = (href) => (onHome ? href : homeHref(href))
+
   return (
-    <header className={`nav ${scrolled ? 'nav--scrolled' : ''}`}>
+    <header className={`nav ${scrolled || !onHome ? 'nav--scrolled' : ''}`}>
       <div className="container nav__inner">
-        <a href="#top" className="brand" onClick={() => setOpen(false)}>
+        <a href={onHome ? '#top' : '/'} className="brand" onClick={() => setOpen(false)}>
           <span className="brand__logo" aria-hidden="true">
             <img src={site.logo} alt="" />
           </span>
@@ -31,17 +41,23 @@ export default function Navbar() {
 
         <nav className={`nav__links ${open ? 'is-open' : ''}`}>
           {nav.links.map((l) => (
-            <a key={l.href} href={l.href} onClick={() => setOpen(false)}>
+            <a key={l.href} href={linkHref(l.href)} onClick={() => setOpen(false)}>
               {l.label}
             </a>
           ))}
-          <a href="#tarifs" className="btn btn--primary nav__cta--mobile" onClick={() => setOpen(false)}>
+          <a
+            href={linkHref('#tarifs')}
+            className="btn btn--primary nav__cta--mobile"
+            onClick={() => setOpen(false)}
+          >
             {nav.ctaMobile}
           </a>
         </nav>
 
         <div className="nav__right">
-          <a href="#tarifs" className="nav__cta">{nav.ctaDesktop}</a>
+          <a href={linkHref('#tarifs')} className="nav__cta">
+            {nav.ctaDesktop}
+          </a>
           <button
             className={`burger ${open ? 'is-open' : ''}`}
             aria-label="Menu"

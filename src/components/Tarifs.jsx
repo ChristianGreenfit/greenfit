@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useContent } from '../context/ContentContext'
 import Icon from './Icon'
 import { useRecentSubscriptions } from '../hooks/useRecentSubscriptions'
-import InscriptionModal from './InscriptionModal'
 import './Tarifs.css'
 
 function TarifReduitWarning({ plan, onContinue, onClose }) {
@@ -71,13 +71,13 @@ function TarifReduitWarning({ plan, onContinue, onClose }) {
 }
 
 export default function Tarifs() {
+  const navigate = useNavigate()
   const { content } = useContent()
   const { tarifs } = content
-  const { plans: PLANS, addons: ADDONS, features: FEATURES, extras } = tarifs
+  const { plans: PLANS, features: FEATURES, extras } = tarifs
 
   const recentCount = useRecentSubscriptions()
   const [pendingPlan, setPendingPlan] = useState(null)
-  const [selectedPlan, setSelectedPlan] = useState(null)
 
   const titleParts = tarifs.title.split(tarifs.titleHighlight)
 
@@ -155,22 +155,15 @@ export default function Tarifs() {
         </div>
       </div>
 
-      {pendingPlan && !selectedPlan && (
+      {pendingPlan && (
         <TarifReduitWarning
           plan={pendingPlan}
           onClose={() => setPendingPlan(null)}
           onContinue={() => {
-            setSelectedPlan(pendingPlan)
+            const months = pendingPlan.months
             setPendingPlan(null)
+            navigate(`/checkout?plan=${months}`)
           }}
-        />
-      )}
-
-      {selectedPlan && (
-        <InscriptionModal
-          plan={selectedPlan}
-          addons={ADDONS}
-          onClose={() => setSelectedPlan(null)}
         />
       )}
     </section>
