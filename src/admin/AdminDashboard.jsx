@@ -600,6 +600,7 @@ function BienEtreSection({ content, updateSection }) {
 function PlanningSection({ content, updateSection }) {
   const { planning } = content
   const typeKeys = Object.keys(planning.types)
+  const [activeDay, setActiveDay] = useState(0)
 
   const update = (patch) => updateSection('planning', (prev) => ({ ...prev, ...patch }))
 
@@ -612,9 +613,15 @@ function PlanningSection({ content, updateSection }) {
           return { ...day, [slotKey]: null }
         }
         if (!slot) {
+          const defaults = {
+            morning: { start: '09:30', end: '10:30' },
+            midday: { start: '12:15', end: '13:00' },
+            evening: { start: '18:30', end: '19:30' },
+          }
+          const d = defaults[slotKey] || { start: '09:30', end: '10:30' }
           return {
             ...day,
-            [slotKey]: { type: value, start: '09:30', end: '10:30' },
+            [slotKey]: { type: value, start: d.start, end: d.end },
           }
         }
         return { ...day, [slotKey]: { ...slot, [field]: value } }
@@ -623,46 +630,121 @@ function PlanningSection({ content, updateSection }) {
     })
 
   const updateType = (key, field, value) =>
+    updateSection('planning', (prev) => {
+      const types = {
+        ...prev.types,
+        [key]: { ...prev.types[key], [field]: value },
+      }
+      // Garder les filtres du site alignés avec le nom du cours
+      const categories = prev.categories.map((cat) =>
+        cat.key === key ? { ...cat, label: field === 'label' ? value : cat.label } : cat,
+      )
+      return { ...prev, types, categories }
+    })
+
+  const addType = () => {
+    const label = window.prompt('Nom du nouveau cours ?', 'Nouveau cours')
+    if (!label || !label.trim()) return
+    const clean = label.trim()
+    let base = clean
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '')
+      .slice(0, 20)
+    if (!base) base = 'cours'
+    let key = base
+    let n = 2
+    while (planning.types[key]) {
+      key = `${base}${n}`
+      n += 1
+    }
+
     updateSection('planning', (prev) => ({
       ...prev,
       types: {
         ...prev.types,
-        [key]: { ...prev.types[key], [field]: value },
+        [key]: { label: clean, tone: 'green', icon: 'pulse' },
       },
+      categories: [
+        ...prev.categories,
+        { key, label: clean },
+      ],
     }))
+  }
+
+  const removeType = (key) => {
+    const name = planning.types[key]?.label || key
+    if (
+      !window.confirm(
+        `Supprimer le cours « ${name} » ?\nLes créneaux qui l’utilisent seront vidés.`,
+      )
+    ) {
+      return
+    }
+    updateSection('planning', (prev) => {
+      const types = { ...prev.types }
+      delete types[key]
+      const categories = prev.categories.filter((c) => c.key !== key)
+      const schedule = prev.schedule.map((day) => {
+        const next = { ...day }
+        for (const slot of prev.slots) {
+          if (next[slot.key]?.type === key) next[slot.key] = null
+        }
+        return next
+      })
+      return { ...prev, types, categories, schedule }
+    })
+  }
+
+  const day = planning.schedule[activeDay]
 
   return (
     <>
-      <Panel title="Textes">
+      <div className="admin__info admin__info--friendly">
+        <h3>Comment gérer le planning</h3>
+        <ol>
+          <li>
+            Créez d’abord vos <strong>cours</strong> (ex. Yoga, Body Pump).
+          </li>
+          <li>
+            Ensuite, choisissez un <strong>jour</strong> et placez un cours le matin, midi ou soir.
+          </li>
+        </ol>
+      </div>
+
+      <Panel title="Textes de la section" description="Ce que les visiteurs lisent au-dessus du calendrier">
         <div className="admin__grid admin__grid--2">
-          <Field label="Eyebrow">
+          <Field label="Petit titre au-dessus" hint="Ex. Cours collectifs">
             <input value={planning.eyebrow} onChange={(e) => update({ eyebrow: e.target.value })} />
           </Field>
-          <Field label="Titre">
+          <Field label="Titre principal">
             <input value={planning.title} onChange={(e) => update({ title: e.target.value })} />
           </Field>
-          <Field label="Sous-titre">
-            <textarea value={planning.subtitle} onChange={(e) => update({ subtitle: e.target.value })} />
+          <Field label="Texte d’introduction">
+            <textarea value={planning.subtitle} onChange={(e) => update({ subtitle: e.target.value })} rows={3} />
           </Field>
-          <Field label="Note de bas de page">
-            <textarea value={planning.note} onChange={(e) => update({ note: e.target.value })} />
+          <Field label="Note sous le calendrier">
+            <textarea value={planning.note} onChange={(e) => update({ note: e.target.value })} rows={3} />
           </Field>
         </div>
       </Panel>
 
-      <Panel title="Types de cours">
-        <div className="admin__grid">
+      <Panel
+        title="Mes cours"
+        description="Liste des activités. Ajoutez un cours ici avant de le placer dans la semaine."
+      >
+        <div className="admin__type-list">
           {typeKeys.map((key) => (
-            <div key={key} className="admin__card">
-              <strong style={{ display: 'block', marginBottom: '0.5rem' }}>{key}</strong>
-              <div className="admin__grid admin__grid--3">
-                <Field label="Nom affiché">
+            <div key={key} className="admin__type-row">
+              <div className="admin__type-main">
+                <Field label="Nom du cours">
                   <input
                     value={planning.types[key].label}
                     onChange={(e) => updateType(key, 'label', e.target.value)}
                   />
                 </Field>
-                <Field label="Couleur">
+                <Field label="Couleur sur le calendrier">
                   <select
                     value={planning.types[key].tone}
                     onChange={(e) => updateType(key, 'tone', e.target.value)}
@@ -677,74 +759,112 @@ function PlanningSection({ content, updateSection }) {
                     value={planning.types[key].icon}
                     onChange={(e) => updateType(key, 'icon', e.target.value)}
                   >
-                    {['pulse', 'strength', 'person', 'wellness', 'spark', 'clock', 'check'].map((icon) => (
-                      <option key={icon} value={icon}>
-                        {icon}
-                      </option>
-                    ))}
+                    <option value="pulse">Cardio</option>
+                    <option value="strength">Force</option>
+                    <option value="person">Personne</option>
+                    <option value="wellness">Bien-être</option>
+                    <option value="spark">Énergie</option>
+                    <option value="clock">Horloge</option>
+                    <option value="check">Check</option>
                   </select>
                 </Field>
               </div>
+              <button
+                type="button"
+                className="admin__btn admin__btn--danger admin__btn--sm"
+                onClick={() => removeType(key)}
+              >
+                Supprimer
+              </button>
             </div>
           ))}
         </div>
+        <button type="button" className="admin__btn admin__btn--primary" onClick={addType} style={{ marginTop: '0.85rem' }}>
+          + Ajouter un cours
+        </button>
       </Panel>
 
-      <Panel title="Grille hebdomadaire" description="Modifiez les cours pour chaque jour et créneau">
-        <div style={{ overflowX: 'auto' }}>
-          <table className="admin__schedule-table">
-            <thead>
-              <tr>
-                <th>Jour / Créneau</th>
-                {planning.slots.map((slot) => (
-                  <th key={slot.key}>{slot.label}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {planning.schedule.map((day, dayIndex) => (
-                <tr key={dayIndex}>
-                  <th>{DAY_NAMES[dayIndex]}</th>
-                  {planning.slots.map((slot) => {
-                    const session = day[slot.key]
-                    return (
-                      <td key={slot.key}>
-                        <div className="admin__schedule-cell">
-                          <select
-                            value={session?.type ?? ''}
-                            onChange={(e) => updateSession(dayIndex, slot.key, 'type', e.target.value)}
-                          >
-                            <option value="">— Aucun —</option>
-                            {typeKeys.map((key) => (
-                              <option key={key} value={key}>
-                                {planning.types[key].label}
-                              </option>
-                            ))}
-                          </select>
-                          {session && (
-                            <>
-                              <input
-                                type="time"
-                                value={session.start}
-                                onChange={(e) =>
-                                  updateSession(dayIndex, slot.key, 'start', e.target.value)
-                                }
-                              />
-                              <input
-                                type="time"
-                                value={session.end}
-                                onChange={(e) => updateSession(dayIndex, slot.key, 'end', e.target.value)}
-                              />
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    )
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <Panel
+        title="Planning de la semaine"
+        description="Choisissez un jour, puis indiquez s’il y a un cours le matin, à midi et/ou le soir."
+      >
+        <div className="admin__day-tabs" role="tablist" aria-label="Jour de la semaine">
+          {DAY_NAMES.map((name, i) => (
+            <button
+              key={name}
+              type="button"
+              role="tab"
+              aria-selected={activeDay === i}
+              className={`admin__day-tab ${activeDay === i ? 'is-active' : ''}`}
+              onClick={() => setActiveDay(i)}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+
+        <div className="admin__day-slots">
+          {planning.slots.map((slot) => {
+            const session = day?.[slot.key]
+            const hasCourse = Boolean(session)
+            return (
+              <div key={slot.key} className={`admin__slot-card ${hasCourse ? 'has-course' : ''}`}>
+                <div className="admin__slot-head">
+                  <strong>{slot.label}</strong>
+                  <label className="admin__toggle">
+                    <input
+                      type="checkbox"
+                      checked={hasCourse}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          const firstType = typeKeys[0] || ''
+                          if (!firstType) {
+                            window.alert('Ajoutez d’abord un cours dans « Mes cours ».')
+                            return
+                          }
+                          updateSession(activeDay, slot.key, 'type', firstType)
+                        } else {
+                          updateSession(activeDay, slot.key, 'type', '')
+                        }
+                      }}
+                    />
+                    <span>{hasCourse ? 'Cours prévu' : 'Pas de cours'}</span>
+                  </label>
+                </div>
+
+                {hasCourse && (
+                  <div className="admin__slot-fields">
+                    <Field label="Quel cours ?">
+                      <select
+                        value={session.type}
+                        onChange={(e) => updateSession(activeDay, slot.key, 'type', e.target.value)}
+                      >
+                        {typeKeys.map((key) => (
+                          <option key={key} value={key}>
+                            {planning.types[key].label}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                    <Field label="Début">
+                      <input
+                        type="time"
+                        value={session.start}
+                        onChange={(e) => updateSession(activeDay, slot.key, 'start', e.target.value)}
+                      />
+                    </Field>
+                    <Field label="Fin">
+                      <input
+                        type="time"
+                        value={session.end}
+                        onChange={(e) => updateSession(activeDay, slot.key, 'end', e.target.value)}
+                      />
+                    </Field>
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </div>
       </Panel>
     </>

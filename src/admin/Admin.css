@@ -561,6 +561,118 @@
   color: #7c3aed;
 }
 
+/* Planning editor */
+.admin__type-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.admin__type-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  padding: 0.85rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 14px;
+  background: #fafbfa;
+}
+
+.admin__type-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.admin__day-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.admin__day-tab {
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--admin-border);
+  background: #fff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.admin__day-tab.is-active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+
+.admin__day-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.admin__slot-card {
+  border: 1px solid var(--admin-border);
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+  background: #fff;
+}
+
+.admin__slot-card.has-course {
+  border-color: rgba(124, 58, 237, 0.28);
+  background: #fbfaff;
+}
+
+.admin__slot-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.admin__slot-head strong {
+  font-size: 1rem;
+}
+
+.admin__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.88rem;
+  color: var(--admin-muted);
+  cursor: pointer;
+}
+
+.admin__toggle input {
+  width: 16px;
+  height: 16px;
+}
+
+.admin__slot-fields {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--admin-border);
+}
+
+@media (max-width: 720px) {
+  .admin__type-main,
+  .admin__slot-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .admin__type-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
 /* Login */
 .admin-login {
   min-height: 100vh;
