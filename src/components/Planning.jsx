@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useContent } from '../context/ContentContext'
+import { sortSessions } from '../lib/planning'
 import Icon from './Icon'
 import './Planning.css'
 
@@ -40,10 +41,9 @@ export default function Planning() {
   const dates = getWeekDates(week)
 
   const sessionsForDay = (dayIndex) =>
-    (SCHEDULE[dayIndex] || [])
-      .filter((s) => sessionMatches(s, category) && TYPES[s.type])
-      .slice()
-      .sort((a, b) => String(a.start).localeCompare(String(b.start)))
+    sortSessions(
+      (SCHEDULE[dayIndex] || []).filter((s) => sessionMatches(s, category) && TYPES[s.type]),
+    )
 
   const mobileSessions = sessionsForDay(selectedDay)
 
@@ -112,7 +112,7 @@ export default function Planning() {
                         return (
                           <div
                             className={`planning__cell tone-${t.tone}`}
-                            key={`${session.type}-${session.start}-${si}`}
+                            key={session.id || `${session.type}-${session.start}-${si}`}
                           >
                             <span className="planning__cell-icon">
                               <Icon name={t.icon} size={16} />
@@ -186,7 +186,7 @@ export default function Planning() {
                 const t = TYPES[session.type]
                 return (
                   <li
-                    key={`${session.type}-${session.start}-${i}`}
+                    key={session.id || `${session.type}-${session.start}-${i}`}
                     className={`planning__mobile-item tone-${t.tone}`}
                   >
                     <span className="planning__mobile-time">{session.start}</span>

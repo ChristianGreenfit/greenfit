@@ -668,14 +668,13 @@ function PlanningSection({ content, updateSection }) {
     ? planning.schedule[activeDay]
     : []
 
-  const updateDaySession = (sessionIndex, field, value) =>
+  const updateDaySession = (sessionId, field, value) =>
     updateSection('planning', (prev) => {
       const schedule = prev.schedule.map((day, di) => {
         if (di !== activeDay) return day
-        const list = (Array.isArray(day) ? day : []).map((s, i) =>
-          i === sessionIndex ? { ...s, [field]: value } : s,
+        return (Array.isArray(day) ? day : []).map((s) =>
+          s.id === sessionId ? { ...s, [field]: value } : s,
         )
-        return list.sort((a, b) => String(a.start).localeCompare(String(b.start)))
       })
       return { ...prev, schedule }
     })
@@ -690,18 +689,23 @@ function PlanningSection({ content, updateSection }) {
       const schedule = prev.schedule.map((day, di) => {
         if (di !== activeDay) return day
         const list = Array.isArray(day) ? [...day] : []
-        list.push({ type: firstType, start: '18:30', end: '19:30' })
-        return list.sort((a, b) => String(a.start).localeCompare(String(b.start)))
+        list.push({
+          id: crypto.randomUUID?.() || `s-${Date.now()}`,
+          type: firstType,
+          start: '18:30',
+          end: '19:30',
+        })
+        return list
       })
       return { ...prev, schedule }
     })
   }
 
-  const removeDaySession = (sessionIndex) =>
+  const removeDaySession = (sessionId) =>
     updateSection('planning', (prev) => {
       const schedule = prev.schedule.map((day, di) => {
         if (di !== activeDay) return day
-        return (Array.isArray(day) ? day : []).filter((_, i) => i !== sessionIndex)
+        return (Array.isArray(day) ? day : []).filter((s) => s.id !== sessionId)
       })
       return { ...prev, schedule }
     })
@@ -820,13 +824,13 @@ function PlanningSection({ content, updateSection }) {
         ) : (
           <div className="admin__day-slots">
             {daySessions.map((session, index) => (
-              <div key={`${session.type}-${session.start}-${index}`} className="admin__slot-card has-course">
+              <div key={session.id || `fallback-${index}`} className="admin__slot-card has-course">
                 <div className="admin__slot-head">
                   <strong>Cours {index + 1}</strong>
                   <button
                     type="button"
                     className="admin__btn admin__btn--danger admin__btn--sm"
-                    onClick={() => removeDaySession(index)}
+                    onClick={() => removeDaySession(session.id)}
                   >
                     Retirer
                   </button>
@@ -835,7 +839,7 @@ function PlanningSection({ content, updateSection }) {
                   <Field label="Quel cours ?">
                     <select
                       value={session.type}
-                      onChange={(e) => updateDaySession(index, 'type', e.target.value)}
+                      onChange={(e) => updateDaySession(session.id, 'type', e.target.value)}
                     >
                       {typeKeys.map((key) => (
                         <option key={key} value={key}>
@@ -848,14 +852,14 @@ function PlanningSection({ content, updateSection }) {
                     <input
                       type="time"
                       value={session.start}
-                      onChange={(e) => updateDaySession(index, 'start', e.target.value)}
+                      onChange={(e) => updateDaySession(session.id, 'start', e.target.value)}
                     />
                   </Field>
                   <Field label="Fin">
                     <input
                       type="time"
                       value={session.end}
-                      onChange={(e) => updateDaySession(index, 'end', e.target.value)}
+                      onChange={(e) => updateDaySession(session.id, 'end', e.target.value)}
                     />
                   </Field>
                 </div>
