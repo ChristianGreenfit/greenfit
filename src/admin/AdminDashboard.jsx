@@ -1,18 +1,74 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useContent } from '../context/ContentContext'
+import AdminLogin from './AdminLogin'
+import { clearAdminToken, verifyAdminSession } from './adminAuth'
 import './Admin.css'
 
 const SECTIONS = [
-  { id: 'overview', label: 'Vue d’ensemble', icon: '◉' },
-  { id: 'hero', label: 'Hero & vidéo', icon: '▶' },
-  { id: 'centre', label: 'Le centre', icon: '◫' },
-  { id: 'bienEtre', label: 'Bien-être', icon: '♡' },
-  { id: 'planning', label: 'Planning', icon: '▦' },
-  { id: 'tarifs', label: 'Tarifs', icon: 'CHF' },
-  { id: 'faq', label: 'FAQ', icon: '?' },
-  { id: 'contact', label: 'Contact', icon: '✉' },
-  { id: 'footer', label: 'Footer & SEO', icon: '⚙' },
+  {
+    id: 'overview',
+    label: 'Accueil',
+    icon: '⌂',
+    blurb: 'Vue d’ensemble',
+    help: 'Choisissez une section à modifier',
+  },
+  {
+    id: 'hero',
+    label: 'Bandeau d’accueil',
+    icon: '▶',
+    blurb: 'Titre, vidéo, chiffres',
+    help: 'Ce que les visiteurs voient en haut de la page',
+  },
+  {
+    id: 'centre',
+    label: 'Le centre',
+    icon: '◫',
+    blurb: 'Textes et photos',
+    help: 'Présentation du centre et galerie photos',
+  },
+  {
+    id: 'bienEtre',
+    label: 'Bien-être',
+    icon: '♡',
+    blurb: 'Offres bien-être',
+    help: 'Sauna, massages, et autres offres',
+  },
+  {
+    id: 'planning',
+    label: 'Planning des cours',
+    icon: '▦',
+    blurb: 'Horaires des cours',
+    help: 'Types de cours et grille horaire',
+  },
+  {
+    id: 'tarifs',
+    label: 'Prix & abonnements',
+    icon: 'CHF',
+    blurb: 'Formules et options',
+    help: 'Prix affichés sur le site (pas les contrats bancaires)',
+  },
+  {
+    id: 'faq',
+    label: 'Questions fréquentes',
+    icon: '?',
+    blurb: 'FAQ',
+    help: 'Questions / réponses du bas de page',
+  },
+  {
+    id: 'contact',
+    label: 'Contact & horaires',
+    icon: '✉',
+    blurb: 'Coordonnées',
+    help: 'Adresse, téléphone et horaires de l’accueil',
+  },
+  {
+    id: 'footer',
+    label: 'Pied de page',
+    icon: '⚙',
+    blurb: 'Liens et titre Google',
+    help: 'Bas de page et infos pour Google',
+  },
 ]
 
 const DAY_NAMES = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
@@ -60,9 +116,44 @@ function Toast({ message, onClose }) {
 }
 
 export default function AdminDashboard() {
+  const [authState, setAuthState] = useState('loading') // loading | guest | ok
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      const ok = await verifyAdminSession()
+      if (!cancelled) setAuthState(ok ? 'ok' : 'guest')
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  if (authState === 'loading') {
+    return (
+      <div className="admin-login">
+        <div className="admin-login__card admin-login__card--loading">
+          <p>Vérification de l’accès…</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (authState === 'guest') {
+    return <AdminLogin onSuccess={() => setAuthState('ok')} />
+  }
+
+  return <AdminShell onLogout={() => {
+    clearAdminToken()
+    setAuthState('guest')
+  }} />
+}
+
+function AdminShell({ onLogout }) {
   const { content, hasChanges, updateSection, resetContent, markSaved } = useContent()
   const [active, setActive] = useState('overview')
   const [toast, setToast] = useState(null)
+  const [navOpen, setNavOpen] = useState(false)
 
   const current = SECTIONS.find((s) => s.id === active)
 
@@ -72,41 +163,49 @@ export default function AdminDashboard() {
   }
 
   const handleSave = () => {
-    showToast(
-      'Sauvegarde cloud non disponible',
-      'Les modifications sont enregistrées localement dans votre navigateur. Firebase ou Supabase sera connecté prochainement pour une persistance serveur.'
-    )
     markSaved()
+    showToast(
+      'Modifications enregistrées',
+      'Elles sont sauvées sur cet ordinateur. Ouvrez le site dans le même navigateur pour les voir. La sauvegarde cloud arrive bientôt.',
+    )
   }
 
   const handleReset = () => {
-    if (window.confirm('Réinitialiser tout le contenu aux valeurs par défaut ?')) {
+    if (window.confirm('Remettre tout le contenu comme au départ ? Les changements locaux seront perdus.')) {
       resetContent()
-      showToast('Contenu réinitialisé', 'Toutes les valeurs ont été remises par défaut.')
+      showToast('Contenu remis à zéro', 'Tout a été remis aux valeurs d’origine.')
     }
   }
 
+  const goSection = (id) => {
+    setActive(id)
+    setNavOpen(false)
+  }
+
   return (
-    <div className="admin">
+    <div className={`admin ${navOpen ? 'is-nav-open' : ''}`}>
       <aside className="admin__sidebar">
         <div className="admin__brand">
           <img src={content.site.logo} alt="" />
           <div>
-            <strong>GreenFit Admin</strong>
-            <span>Panneau de gestion</span>
+            <strong>GreenFit</strong>
+            <span>Modifier le site</span>
           </div>
         </div>
 
-        <nav className="admin__nav">
+        <nav className="admin__nav" aria-label="Sections du site">
           {SECTIONS.map((section) => (
             <button
               key={section.id}
               type="button"
               className={`admin__nav-btn ${active === section.id ? 'is-active' : ''}`}
-              onClick={() => setActive(section.id)}
+              onClick={() => goSection(section.id)}
             >
               <span className="admin__nav-icon">{section.icon}</span>
-              {section.label}
+              <span className="admin__nav-text">
+                <strong>{section.label}</strong>
+                <em>{section.blurb}</em>
+              </span>
             </button>
           ))}
         </nav>
@@ -115,24 +214,43 @@ export default function AdminDashboard() {
           <Link to="/" target="_blank" rel="noopener noreferrer">
             Voir le site →
           </Link>
-          <button type="button" onClick={handleReset}>
-            Réinitialiser
+          <button type="button" onClick={onLogout}>
+            Se déconnecter
           </button>
         </div>
       </aside>
 
+      {navOpen && (
+        <button
+          type="button"
+          className="admin__nav-backdrop"
+          aria-label="Fermer le menu"
+          onClick={() => setNavOpen(false)}
+        />
+      )}
+
       <div className="admin__main">
         <header className="admin__topbar">
-          <div>
-            <h1>{current?.label}</h1>
-            <p>Gérez le contenu du site GreenFit</p>
+          <div className="admin__topbar-left">
+            <button
+              type="button"
+              className="admin__menu-btn"
+              aria-label="Ouvrir le menu"
+              onClick={() => setNavOpen((v) => !v)}
+            >
+              ☰
+            </button>
+            <div>
+              <h1>{current?.label}</h1>
+              <p>{current?.help || 'Modifiez le contenu, puis cliquez sur Enregistrer.'}</p>
+            </div>
           </div>
           <div className="admin__topbar-actions">
             <span className={`admin__badge ${hasChanges ? '' : 'is-clean'}`}>
-              {hasChanges ? '● Modifications non sauvegardées' : '● À jour (local)'}
+              {hasChanges ? '● Pas encore enregistré' : '● Enregistré'}
             </span>
             <button type="button" className="admin__btn admin__btn--ghost" onClick={handleReset}>
-              Annuler
+              Tout annuler
             </button>
             <button type="button" className="admin__btn admin__btn--primary" onClick={handleSave}>
               Enregistrer
@@ -141,7 +259,7 @@ export default function AdminDashboard() {
         </header>
 
         <div className="admin__content">
-          {active === 'overview' && <OverviewSection content={content} onNavigate={setActive} />}
+          {active === 'overview' && <OverviewSection content={content} onNavigate={goSection} />}
           {active === 'hero' && <HeroSection content={content} updateSection={updateSection} />}
           {active === 'centre' && <CentreSection content={content} updateSection={updateSection} />}
           {active === 'bienEtre' && <BienEtreSection content={content} updateSection={updateSection} />}
@@ -161,13 +279,18 @@ export default function AdminDashboard() {
 function OverviewSection({ content, onNavigate }) {
   return (
     <>
-      <div className="admin__info">
-        <h3>Mode démo — sans backend</h3>
-        <p>
-          Ce dashboard permet de modifier tous les contenus du site en temps réel. Les changements
-          sont enregistrés localement dans votre navigateur (localStorage) pour prévisualisation.
-          La prochaine étape sera de connecter Firebase ou Supabase pour une sauvegarde permanente
-          et multi-utilisateurs.
+      <div className="admin__info admin__info--friendly">
+        <h3>Bienvenue dans l’espace de modification</h3>
+        <ol>
+          <li>Choisissez une section à gauche (ou ci-dessous).</li>
+          <li>Modifiez les textes, prix ou horaires.</li>
+          <li>Cliquez sur <strong>Enregistrer</strong> en haut à droite.</li>
+          <li>
+            Ouvrez <strong>Voir le site</strong> pour vérifier le résultat.
+          </li>
+        </ol>
+        <p className="admin__info-note">
+          Astuce : restez sur le même ordinateur et le même navigateur pour voir vos changements.
         </p>
       </div>
 
@@ -182,7 +305,7 @@ function OverviewSection({ content, onNavigate }) {
         </div>
         <div className="admin__stat">
           <strong>{content.centre.photos.length}</strong>
-          <span>Photos centre</span>
+          <span>Photos</span>
         </div>
         <div className="admin__stat">
           <strong>{Object.keys(content.planning.types).length}</strong>
@@ -190,20 +313,19 @@ function OverviewSection({ content, onNavigate }) {
         </div>
       </div>
 
-      <Panel title="Sections éditables" description="Cliquez pour accéder à l’éditeur">
+      <Panel title="Que voulez-vous modifier ?" description="Cliquez sur une carte pour commencer">
         <div className="admin__grid admin__grid--3">
           {SECTIONS.filter((s) => s.id !== 'overview').map((section) => (
             <button
               key={section.id}
               type="button"
-              className="admin__card"
-              style={{ cursor: 'pointer', textAlign: 'left' }}
+              className="admin__card admin__card--nav"
               onClick={() => onNavigate(section.id)}
             >
+              <span className="admin__card-icon">{section.icon}</span>
               <strong>{section.label}</strong>
-              <p style={{ fontSize: '0.85rem', color: 'var(--admin-muted)', marginTop: '0.35rem' }}>
-                Modifier →
-              </p>
+              <p>{section.help}</p>
+              <span className="admin__card-cta">Modifier →</span>
             </button>
           ))}
         </div>

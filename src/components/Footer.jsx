@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import { useContent } from '../context/ContentContext'
 import './Footer.css'
 
@@ -46,7 +45,6 @@ export default function Footer() {
             <a href="#">Mentions légales</a>
             <a href="#">Confidentialité</a>
             <a href="#">CGV</a>
-            <Link to="/admin" className="footer__admin-link">Admin</Link>
           </div>
         </div>
       </div>
