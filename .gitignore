@@ -20,3 +20,5 @@ Screenshot*
 !.env.example
 supabase/.env
 supabase/.temp
+.vercel
+.env*.local
