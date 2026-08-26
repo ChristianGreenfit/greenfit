@@ -38,8 +38,10 @@ export default async function handler(req, res) {
       auth: { user: config.smtp.user, pass: config.smtp.pass },
     });
 
+    // Infomaniak exige que From = boîte authentifiée (SMTP_USER)
+    const fromAddr = config.smtp.user || config.email.fromEmail;
     const info = await transporter.sendMail({
-      from: `"GreenFit" <${config.email.fromEmail}>`,
+      from: `"GreenFit" <${fromAddr}>`,
       to,
       subject: "GreenFit — Confirmation d’inscription (test)",
       html: renderClientEmailPreview(),

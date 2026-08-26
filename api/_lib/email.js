@@ -318,8 +318,10 @@ async function send(to, subject, html) {
     return;
   }
   try {
+    // Infomaniak exige que From = boîte authentifiée (SMTP_USER)
+    const fromAddr = config.smtp.user || config.email.fromEmail;
     await t.sendMail({
-      from: `"GreenFit" <${config.email.fromEmail}>`,
+      from: `"GreenFit" <${fromAddr}>`,
       to,
       subject,
       html,
