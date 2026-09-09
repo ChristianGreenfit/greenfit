@@ -100,20 +100,21 @@ export const defaultContent = {
         url: 'https://pilates-studio.ch',
         logo: true,
       },
-      {
-        title: 'Julia',
-        text: 'Partenaire GreenFit. Nom d’activité, logo et site internet à compléter.',
-        src: '/images/salle/salle4.jpg',
-        alt: 'Julia — partenaire GreenFit',
-        url: '',
-      },
-      {
-        title: 'Inès',
-        text: 'Partenaire GreenFit. Nom de la nouvelle société, logo et site internet à compléter.',
-        src: '/images/salle/salle2.jpg',
-        alt: 'Inès — partenaire GreenFit',
-        url: '',
-      },
+      // {
+      // title: 'Julia',
+      // text: 'Partenaire GreenFit. Nom d’activité, logo et site internet à compléter.',
+      // src: '/images/salle/salle4.jpg',
+      // alt: 'Julia — partenaire GreenFit',
+      // url: '',
+      // },
+      // {
+      // title: 'Inès',
+      // text: 'Partenaire GreenFit. Nom de la nouvelle société, logo et site internet à compléter.',
+      // src: '/images/salle/salle2.jpg',
+      // alt: 'Inès — partenaire GreenFit',
+      // url: '',
+      // },
+
     ],
   },
 
