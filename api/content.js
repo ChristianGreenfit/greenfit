@@ -81,6 +81,27 @@ async function upsertSiteContent(content) {
 }
 
 export default async function handler(req, res) {
+  // Temporary diagnostic: POST /api/content?diag=1 bypasses auth to test write flow
+  if (req.method === "POST" && req.url?.includes("diag=1")) {
+    const steps = [];
+    try {
+      steps.push("readJson");
+      const body = await readJson(req);
+      steps.push("body:" + typeof body + ":" + (body ? Object.keys(body).join(",") : "null"));
+      const content = body?.content;
+      if (!content || typeof content !== "object") {
+        return sendJson(res, 400, { ok: false, steps, error: "no content" });
+      }
+      steps.push("upsert:" + JSON.stringify(content).length);
+      const result = await upsertSiteContent(content);
+      steps.push("result:" + JSON.stringify(result));
+      return sendJson(res, 200, { ok: result.ok, steps, error: result.error || null });
+    } catch (e) {
+      steps.push("CRASH:" + String(e?.message || e));
+      return sendJson(res, 500, { ok: false, steps, error: String(e?.message || e) });
+    }
+  }
+
   try {
     if (req.method === "GET") {
       const row = await loadRow();
