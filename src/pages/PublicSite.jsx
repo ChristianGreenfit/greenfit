@@ -4,7 +4,7 @@ import { useContent } from '../context/ContentContext'
 import Navbar from '../components/Navbar'
 import Hero from '../components/Hero'
 import Centre from '../components/Centre'
-// import BienEtre from '../components/BienEtre'
+import BienEtre from '../components/BienEtre'
 import Planning from '../components/Planning'
 import Tarifs from '../components/Tarifs'
 import Faq from '../components/Faq'
@@ -27,7 +27,7 @@ export default function PublicSite() {
       <main>
         <Hero />
         <Centre />
-        {/* <BienEtre /> */}
+        <BienEtre />
         <Planning />
         <Tarifs />
         <Faq />
