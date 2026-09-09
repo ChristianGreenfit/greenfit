@@ -4,6 +4,7 @@ import { db } from "./_lib/db.js";
 import { getBearerToken, verifyAdminToken } from "./_lib/adminAuth.js";
 import { sendJson, readJson } from "./_lib/http.js";
 import { defaultContent } from "./_lib/defaultContent.js";
+import { config } from "./_lib/config.js";
 
 function deepMerge(base, overlay) {
   if (!overlay || typeof overlay !== "object" || Array.isArray(overlay)) {
@@ -39,6 +40,46 @@ async function loadRow() {
   return data;
 }
 
+/** Upsert via REST PostgREST — plus stable que supabase-js sur Vercel pour gros JSON. */
+async function upsertSiteContent(content) {
+  const base = String(config.supabaseUrl || "").replace(/\/$/, "");
+  const key = config.supabaseServiceKey;
+  if (!base || !key) {
+    return { ok: false, error: "Configuration Supabase manquante sur Vercel" };
+  }
+
+  let safeContent;
+  try {
+    safeContent = JSON.parse(JSON.stringify(content));
+  } catch {
+    return { ok: false, error: "Contenu non sérialisable" };
+  }
+
+  const res = await fetch(`${base}/rest/v1/site_content?on_conflict=id`, {
+    method: "POST",
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+      Prefer: "resolution=merge-duplicates,return=minimal",
+    },
+    body: JSON.stringify({
+      id: "main",
+      data: safeContent,
+      updated_at: new Date().toISOString(),
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    return {
+      ok: false,
+      error: `Supabase ${res.status}: ${text.slice(0, 300) || res.statusText}`,
+    };
+  }
+  return { ok: true };
+}
+
 export default async function handler(req, res) {
   try {
     if (req.method === "GET") {
@@ -46,17 +87,9 @@ export default async function handler(req, res) {
       const saved = row?.data && Object.keys(row.data).length > 0 ? row.data : null;
       const content = saved ? deepMerge(defaultContent, saved) : defaultContent;
 
-      // Si vide, on initialise avec les défauts
       if (!saved) {
-        const { error: initErr } = await db.from("site_content").upsert(
-          {
-            id: "main",
-            data: defaultContent,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: "id" },
-        );
-        if (initErr) throw initErr;
+        const init = await upsertSiteContent(defaultContent);
+        if (!init.ok) throw new Error(init.error);
       }
 
       return sendJson(res, 200, {
@@ -72,13 +105,6 @@ export default async function handler(req, res) {
         return sendJson(res, 401, { ok: false, error: "Non autorisé" });
       }
 
-      if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-        return sendJson(res, 500, {
-          ok: false,
-          error: "Configuration Supabase manquante sur Vercel",
-        });
-      }
-
       const body = await readJson(req);
       const content = body?.content;
       if (!content || typeof content !== "object" || Array.isArray(content)) {
@@ -88,22 +114,9 @@ export default async function handler(req, res) {
         });
       }
 
-      const { error } = await db.from("site_content").upsert(
-        {
-          id: "main",
-          data: content,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "id" },
-      );
-      if (error) {
-        console.error("[content] upsert:", error);
-        return sendJson(res, 500, {
-          ok: false,
-          error: error.message || "Erreur Supabase lors de la sauvegarde",
-          code: error.code || null,
-          details: error.details || null,
-        });
+      const result = await upsertSiteContent(content);
+      if (!result.ok) {
+        return sendJson(res, 500, { ok: false, error: result.error });
       }
 
       return sendJson(res, 200, { ok: true });
