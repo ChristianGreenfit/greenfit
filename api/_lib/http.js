@@ -22,6 +22,15 @@ export function baseUrl(req) {
 // Lit le corps JSON, que Vercel l'ait déjà parsé (req.body) ou non.
 export async function readJson(req) {
   if (req.body !== undefined && req.body !== null) {
+    if (Buffer.isBuffer(req.body)) {
+      const raw = req.body.toString("utf8");
+      if (!raw) return null;
+      try {
+        return JSON.parse(raw);
+      } catch {
+        return null;
+      }
+    }
     if (typeof req.body === "string") {
       try {
         return JSON.parse(req.body);

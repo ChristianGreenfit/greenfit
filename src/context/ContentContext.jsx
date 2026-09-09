@@ -18,9 +18,28 @@ function deepClone(obj) {
 
 function normalizeContent(raw) {
   const content = deepClone(raw || defaultContent)
+
   if (content.planning) {
     content.planning = normalizePlanning(content.planning)
   }
+
+  if (content.bienEtre?.offers) {
+    content.bienEtre.offers = content.bienEtre.offers.map((offer) => ({
+      url: '',
+      logo: false,
+      ...offer,
+    }))
+  }
+
+  if (content.footer?.columns) {
+    content.footer.columns = content.footer.columns.map((col) => ({
+      ...col,
+      links: (col.links || []).map((link) =>
+        typeof link === 'string' ? { label: link, href: '#' } : link,
+      ),
+    }))
+  }
+
   return content
 }
 
@@ -91,9 +110,22 @@ export function ContentProvider({ children }) {
         },
         body: JSON.stringify({ content }),
       })
-      const data = await res.json().catch(() => ({}))
+      const raw = await res.text()
+      let data = {}
+      try {
+        data = raw ? JSON.parse(raw) : {}
+      } catch {
+        throw new Error(
+          res.status === 404
+            ? 'API indisponible (404). Relancez le serveur local après la mise à jour, ou utilisez l’admin en production.'
+            : `Réponse invalide du serveur (${res.status}).`,
+        )
+      }
       if (!res.ok) {
-        throw new Error(data.error || 'Sauvegarde impossible')
+        if (res.status === 401) {
+          throw new Error('Session expirée ou non autorisée — reconnectez-vous.')
+        }
+        throw new Error(data.error || `Sauvegarde impossible (${res.status})`)
       }
       setHasChanges(false)
       return true

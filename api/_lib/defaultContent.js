@@ -12,7 +12,7 @@ export const defaultContent = {
   nav: {
     links: [
       { href: '#centre', label: 'Le centre' },
-      { href: '#bien-etre', label: 'Bien-être' },
+      { href: '#partenaires', label: 'Partenaires' },
       { href: '#planning', label: 'Cours collectifs' },
       { href: '#tarifs', label: 'Tarifs' },
       { href: '#faq', label: 'FAQ' },
@@ -53,7 +53,7 @@ export const defaultContent = {
       },
       {
         title: 'Studios collectifs',
-        text: 'Deux studios insonorisés pour yoga, cycling et cours toniques.',
+        text: 'Trois salles : Functional, cours collectifs et salle de spinning.',
       },
       {
         title: 'Espace bien-être',
@@ -78,29 +78,41 @@ export const defaultContent = {
   },
 
   bienEtre: {
-    label: 'Bien-être',
-    title: 'Une approche globale de votre santé',
+    label: 'Partenaires',
+    title: 'Des experts à vos côtés',
     lead:
-      'En collaboration avec nos partenaires, profitez de l’expertise de physiothérapeutes, d’une naturopathe et d’une spécialiste du Pilates Reformer pour un accompagnement complet et personnalisé.',
-    cta: 'Prendre rendez-vous',
+      'Au sein de GreenFit, nos partenaires vous accompagnent pour la physiothérapie, le Pilates et d’autres disciplines complémentaires un suivi complet, au même endroit.',
+    cta: '',
     offers: [
       {
-        title: 'Physiothérapie',
-        text: 'L’expertise de physiothérapeutes partenaires pour la rééducation, la prévention et le suivi.',
-        src: '/images/salle/salle5.jpg',
-        alt: 'Cabinet de physiothérapie GreenFit',
+        title: 'Physio Sport & Santé',
+        text: 'Cabinet de physiothérapie spécialisé en réhabilitation sportive, au sein de GreenFit.',
+        src: '/images/partenaires/physio-sport-sante.png',
+        alt: 'Logo Physio Sport & Santé',
+        url: 'https://physio-sport-sante.com',
+        logo: true,
       },
       {
-        title: 'Pilates Reformer',
-        text: 'Une spécialiste du Pilates Reformer pour renforcer, étirer et retrouver un corps aligné.',
-        src: '/images/salle/pilates-reformer.jpg',
-        alt: 'Studio Pilates Reformer GreenFit',
+        title: 'Pilates Studio Anna Lillo',
+        text: 'Cours privés et semi-privés de Pilates Reformer, pour renforcer, étirer et retrouver un corps aligné.',
+        src: '/images/partenaires/pilates-studio-anna-lillo.png',
+        alt: 'Logo Pilates Studio Anna Lillo',
+        url: 'https://pilates-studio.ch',
+        logo: true,
       },
       {
-        title: 'Naturopathie',
-        text: 'Une naturopathe partenaire pour un accompagnement personnalisé de votre vitalité.',
-        src: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&q=80',
-        alt: 'Consultation naturopathie GreenFit',
+        title: 'Julia',
+        text: 'Partenaire GreenFit. Nom d’activité, logo et site internet à compléter.',
+        src: '/images/salle/salle4.jpg',
+        alt: 'Julia — partenaire GreenFit',
+        url: '',
+      },
+      {
+        title: 'Inès',
+        text: 'Partenaire GreenFit. Nom de la nouvelle société, logo et site internet à compléter.',
+        src: '/images/salle/salle2.jpg',
+        alt: 'Inès — partenaire GreenFit',
+        url: '',
       },
     ],
   },
@@ -241,7 +253,7 @@ export const defaultContent = {
       },
       {
         title: '3 jours d’essai offerts',
-        text: 'Venez découvrir le centre librement, sans engagement.',
+        text: 'Contactez la réception ou venez sur place pendant les heures d’ouverture.',
         icon: 'spark',
       },
     ],
@@ -291,7 +303,7 @@ export const defaultContent = {
     title: 'On se rencontre bientôt ?',
     titleHighlight: 'bientôt ?',
     intro:
-      '3 jours d’essai gratuits, une visite du centre ou une simple question — notre équipe vous répond sous 24 h.',
+      'Pour un essai gratuit, contactez la réception par téléphone ou venez directement sur place pendant les heures d’ouverture.',
     phone: '027 565 41 31',
     phoneHref: 'tel:+41275654131',
     email: 'info@green-fit.ch',
@@ -306,11 +318,6 @@ export const defaultContent = {
     ],
     hoursNote:
       'Fitness adhérents : 24 h/24 · Jours fériés : réception fermée, pas de cours collectifs.',
-    formTitle: 'Demande d’essai gratuit',
-    formSubtitle: 'Sans engagement',
-    successTitle: 'Message envoyé',
-    successMessage:
-      'Notre équipe vous recontacte très vite pour planifier votre essai de 3 jours.',
   },
 
   footer: {
@@ -319,15 +326,31 @@ export const defaultContent = {
     columns: [
       {
         title: 'Le centre',
-        links: ['À propos', 'Nos coachs', 'Équipements', 'Recrutement'],
+        links: [
+          { label: 'À propos', href: '#centre' },
+          // Pas encore de section dédiée :
+          // { label: 'Nos coachs', href: '#centre' },
+          // { label: 'Équipements', href: '#centre' },
+          // { label: 'Recrutement', href: '#contact' },
+        ],
       },
       {
         title: 'Activités',
-        links: ['Cours collectifs', 'Bien-être', 'Musculation', 'Coaching'],
+        links: [
+          { label: 'Cours collectifs', href: '#planning' },
+          { label: 'Partenaires', href: '#partenaires' },
+          // Pas de page dédiée pour l’instant :
+          // { label: 'Musculation', href: '#centre' },
+          // { label: 'Coaching', href: '#centre' },
+        ],
       },
       {
         title: 'Infos',
-        links: ['Tarifs', 'FAQ', 'Contact'],
+        links: [
+          { label: 'Tarifs', href: '#tarifs' },
+          { label: 'FAQ', href: '#faq' },
+          { label: 'Contact', href: '#contact' },
+        ],
       },
     ],
   },

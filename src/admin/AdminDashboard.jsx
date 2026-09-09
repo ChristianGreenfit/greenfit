@@ -29,10 +29,10 @@ const SECTIONS = [
   },
   {
     id: 'bienEtre',
-    label: 'Bien-être',
+    label: 'Partenaires',
     icon: '♡',
-    blurb: 'Offres bien-être',
-    help: 'Sauna, massages, et autres offres',
+    blurb: 'Partenaires du centre',
+    help: 'Physio, Pilates, Julia, Inès — logos et liens',
   },
   {
     id: 'planning',
@@ -165,6 +165,15 @@ function AdminShell({ onLogout }) {
 
   const handleSave = async () => {
     try {
+      const stillOk = await verifyAdminSession()
+      if (!stillOk) {
+        showToast(
+          'Échec de l’enregistrement',
+          'Session expirée — reconnectez-vous à l’admin.',
+        )
+        onLogout()
+        return
+      }
       await saveContent()
       showToast(
         'Enregistré sur le site',
@@ -591,31 +600,46 @@ function BienEtreSection({ content, updateSection }) {
           <Field label="Introduction">
             <textarea value={bienEtre.lead} onChange={(e) => update({ lead: e.target.value })} />
           </Field>
-          <Field label="Bouton CTA">
-            <input value={bienEtre.cta} onChange={(e) => update({ cta: e.target.value })} />
+          <Field label="Bouton CTA (laisser vide pour masquer)">
+            <input value={bienEtre.cta || ''} onChange={(e) => update({ cta: e.target.value })} />
           </Field>
         </div>
       </Panel>
 
-      <Panel title="Offres">
+      <Panel title="Partenaires">
         {bienEtre.offers.map((offer, i) => (
           <div key={i} className="admin__card" style={{ marginBottom: '0.75rem' }}>
             <div className="admin__grid">
-              <Field label="Titre">
+              <Field label="Nom">
                 <input value={offer.title} onChange={(e) => updateOffer(i, 'title', e.target.value)} />
               </Field>
               <Field label="Description">
                 <textarea value={offer.text} onChange={(e) => updateOffer(i, 'text', e.target.value)} />
               </Field>
               <div className="admin__grid admin__grid--2">
-                <Field label="Image URL">
+                <Field label="Logo / image (URL)">
                   <input value={offer.src} onChange={(e) => updateOffer(i, 'src', e.target.value)} />
                 </Field>
                 <Field label="Alt">
-                  <input value={offer.alt} onChange={(e) => updateOffer(i, 'alt', e.target.value)} />
+                  <input value={offer.alt || ''} onChange={(e) => updateOffer(i, 'alt', e.target.value)} />
                 </Field>
               </div>
-              <img className="admin__preview" src={offer.src} alt={offer.alt} />
+              <Field label="Site web (URL)">
+                <input
+                  value={offer.url || ''}
+                  onChange={(e) => updateOffer(i, 'url', e.target.value)}
+                  placeholder="https://…"
+                />
+              </Field>
+              <label className="admin__check" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <input
+                  type="checkbox"
+                  checked={Boolean(offer.logo)}
+                  onChange={(e) => updateOffer(i, 'logo', e.target.checked)}
+                />
+                Afficher comme logo (pas en photo plein cadre)
+              </label>
+              {offer.src ? <img className="admin__preview" src={offer.src} alt={offer.alt || ''} /> : null}
             </div>
           </div>
         ))}
@@ -1145,17 +1169,17 @@ function ContactSection({ content, updateSection }) {
     <>
       <Panel title="Textes">
         <div className="admin__grid">
-          <Field label="Introduction">
-            <textarea value={contact.intro} onChange={(e) => update({ intro: e.target.value })} />
+          <Field label="Titre">
+            <input value={contact.title} onChange={(e) => update({ title: e.target.value })} />
           </Field>
-          <Field label="Titre formulaire">
-            <input value={contact.formTitle} onChange={(e) => update({ formTitle: e.target.value })} />
-          </Field>
-          <Field label="Message de succès">
-            <textarea
-              value={contact.successMessage}
-              onChange={(e) => update({ successMessage: e.target.value })}
+          <Field label="Surbrillance du titre">
+            <input
+              value={contact.titleHighlight}
+              onChange={(e) => update({ titleHighlight: e.target.value })}
             />
+          </Field>
+          <Field label="Introduction (essai / contact)">
+            <textarea value={contact.intro} onChange={(e) => update({ intro: e.target.value })} />
           </Field>
         </div>
       </Panel>
@@ -1202,6 +1226,10 @@ function ContactSection({ content, updateSection }) {
   )
 }
 
+function deepCloneColumns(columns) {
+  return JSON.parse(JSON.stringify(columns))
+}
+
 function FooterSection({ content, updateSection }) {
   const { footer, site, nav } = content
 
@@ -1243,6 +1271,51 @@ function FooterSection({ content, updateSection }) {
             }
           />
         </Field>
+        {footer.columns.map((col, ci) => (
+          <div key={col.title} style={{ marginTop: '1rem' }}>
+            <h4 style={{ marginBottom: '0.5rem' }}>{col.title}</h4>
+            {col.links.map((link, li) => {
+              const label = typeof link === 'string' ? link : link.label
+              const href = typeof link === 'string' ? '#' : link.href || '#'
+              return (
+                <div key={li} className="admin__grid admin__grid--2" style={{ marginBottom: '0.5rem' }}>
+                  <Field label="Libellé">
+                    <input
+                      value={label}
+                      onChange={(e) =>
+                        updateSection('footer', (prev) => {
+                          const columns = deepCloneColumns(prev.columns)
+                          const cur = columns[ci].links[li]
+                          columns[ci].links[li] =
+                            typeof cur === 'string'
+                              ? { label: e.target.value, href: '#' }
+                              : { ...cur, label: e.target.value }
+                          return { ...prev, columns }
+                        })
+                      }
+                    />
+                  </Field>
+                  <Field label="Lien (ancre)">
+                    <input
+                      value={href}
+                      onChange={(e) =>
+                        updateSection('footer', (prev) => {
+                          const columns = deepCloneColumns(prev.columns)
+                          const cur = columns[ci].links[li]
+                          columns[ci].links[li] =
+                            typeof cur === 'string'
+                              ? { label: cur, href: e.target.value }
+                              : { ...cur, href: e.target.value }
+                          return { ...prev, columns }
+                        })
+                      }
+                    />
+                  </Field>
+                </div>
+              )
+            })}
+          </div>
+        ))}
       </Panel>
 
       <Panel title="Navigation">

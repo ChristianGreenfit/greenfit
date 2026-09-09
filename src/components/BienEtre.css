@@ -1,6 +1,15 @@
 .bienetre {
   background: var(--bg-soft);
   padding: 80px 0;
+  position: relative;
+}
+
+.bienetre__anchor {
+  position: absolute;
+  top: calc(var(--nav-h) * -1);
+  height: 1px;
+  width: 1px;
+  pointer-events: none;
 }
 
 .bienetre__head {
@@ -47,7 +56,7 @@
 
 .bienetre__grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
 }
 
@@ -57,6 +66,8 @@
   border-radius: var(--r-md);
   overflow: hidden;
   transition: box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .bienetre__card:hover {
@@ -66,6 +77,7 @@
 .bienetre__card-media {
   margin: 0;
   overflow: hidden;
+  background: var(--bg);
 }
 
 .bienetre__card-media img {
@@ -76,21 +88,62 @@
   transition: transform 0.5s ease;
 }
 
-.bienetre__card:hover .bienetre__card-media img {
+.bienetre__card-media--logo {
+  display: grid;
+  place-items: center;
+  min-height: 180px;
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+}
+
+.bienetre__card-media--logo img {
+  width: auto;
+  max-width: 70%;
+  height: auto;
+  max-height: 120px;
+  object-fit: contain;
+  padding: 24px;
+}
+
+.bienetre__card:hover .bienetre__card-media:not(.bienetre__card-media--logo) img {
   transform: scale(1.03);
+}
+
+.bienetre__card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 16px 18px 18px;
 }
 
 .bienetre__card h3 {
   font-size: 1.02rem;
   font-weight: 600;
-  padding: 16px 18px 6px;
+  margin: 0 0 6px;
 }
 
 .bienetre__card p {
   font-size: 0.88rem;
   line-height: 1.55;
   color: var(--muted);
-  padding: 0 18px 18px;
+  margin: 0;
+  flex: 1;
+  text-align: left;
+}
+
+.bienetre__card-link {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 14px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--purple-700);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.bienetre__card-link:hover {
+  color: var(--purple);
 }
 
 @media (max-width: 900px) {

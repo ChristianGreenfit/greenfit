@@ -48,11 +48,15 @@ export default async function handler(req, res) {
 
       // Si vide, on initialise avec les défauts
       if (!saved) {
-        await db.from("site_content").upsert({
-          id: "main",
-          data: defaultContent,
-          updated_at: new Date().toISOString(),
-        });
+        const { error: initErr } = await db.from("site_content").upsert(
+          {
+            id: "main",
+            data: defaultContent,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "id" },
+        );
+        if (initErr) throw initErr;
       }
 
       return sendJson(res, 200, {
@@ -68,18 +72,39 @@ export default async function handler(req, res) {
         return sendJson(res, 401, { ok: false, error: "Non autorisé" });
       }
 
-      const body = await readJson(req);
-      const content = body?.content;
-      if (!content || typeof content !== "object") {
-        return sendJson(res, 400, { ok: false, error: "Contenu manquant" });
+      if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        return sendJson(res, 500, {
+          ok: false,
+          error: "Configuration Supabase manquante sur Vercel",
+        });
       }
 
-      const { error } = await db.from("site_content").upsert({
-        id: "main",
-        data: content,
-        updated_at: new Date().toISOString(),
-      });
-      if (error) throw error;
+      const body = await readJson(req);
+      const content = body?.content;
+      if (!content || typeof content !== "object" || Array.isArray(content)) {
+        return sendJson(res, 400, {
+          ok: false,
+          error: "Contenu manquant ou invalide",
+        });
+      }
+
+      const { error } = await db.from("site_content").upsert(
+        {
+          id: "main",
+          data: content,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "id" },
+      );
+      if (error) {
+        console.error("[content] upsert:", error);
+        return sendJson(res, 500, {
+          ok: false,
+          error: error.message || "Erreur Supabase lors de la sauvegarde",
+          code: error.code || null,
+          details: error.details || null,
+        });
+      }
 
       return sendJson(res, 200, { ok: true });
     }
