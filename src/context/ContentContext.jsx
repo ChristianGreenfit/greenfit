@@ -115,10 +115,9 @@ export function ContentProvider({ children }) {
       try {
         data = raw ? JSON.parse(raw) : {}
       } catch {
+        const snippet = (raw || '').replace(/\s+/g, ' ').slice(0, 160)
         throw new Error(
-          res.status === 404
-            ? 'API indisponible (404). Relancez le serveur local après la mise à jour, ou utilisez l’admin en production.'
-            : `Réponse invalide du serveur (${res.status}).`,
+          `Réponse invalide du serveur (${res.status})${snippet ? ` : ${snippet}` : ''}`,
         )
       }
       if (!res.ok) {

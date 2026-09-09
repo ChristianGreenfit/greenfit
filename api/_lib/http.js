@@ -1,4 +1,5 @@
 // Petits utilitaires HTTP pour les fonctions serverless Vercel (Node).
+import { Buffer } from "node:buffer";
 
 export function sendJson(res, status, obj) {
   res.statusCode = status;
