@@ -81,27 +81,6 @@ async function upsertSiteContent(content) {
 }
 
 export default async function handler(req, res) {
-  // Temporary diagnostic: POST /api/content?diag=1 bypasses auth to test write flow
-  if (req.method === "POST" && req.url?.includes("diag=1")) {
-    const steps = [];
-    try {
-      steps.push("readJson");
-      const body = await readJson(req);
-      steps.push("body:" + typeof body + ":" + (body ? Object.keys(body).join(",") : "null"));
-      const content = body?.content;
-      if (!content || typeof content !== "object") {
-        return sendJson(res, 400, { ok: false, steps, error: "no content" });
-      }
-      steps.push("upsert:" + JSON.stringify(content).length);
-      const result = await upsertSiteContent(content);
-      steps.push("result:" + JSON.stringify(result));
-      return sendJson(res, 200, { ok: result.ok, steps, error: result.error || null });
-    } catch (e) {
-      steps.push("CRASH:" + String(e?.message || e));
-      return sendJson(res, 500, { ok: false, steps, error: String(e?.message || e) });
-    }
-  }
-
   try {
     if (req.method === "GET") {
       const row = await loadRow();
@@ -121,41 +100,21 @@ export default async function handler(req, res) {
     }
 
     if (req.method === "PUT") {
-      console.log("[content PUT] start");
-
       const token = getBearerToken(req);
-      console.log("[content PUT] token length:", token?.length ?? 0);
-
       if (!verifyAdminToken(token)) {
-        console.log("[content PUT] auth failed");
         return sendJson(res, 401, { ok: false, error: "Non autorisé" });
       }
-      console.log("[content PUT] auth OK");
 
-      let body;
-      try {
-        body = await readJson(req);
-        console.log("[content PUT] body parsed, type:", typeof body, "keys:", body ? Object.keys(body).join(",") : "null");
-      } catch (parseErr) {
-        console.error("[content PUT] readJson crash:", parseErr);
-        return sendJson(res, 400, { ok: false, error: "Erreur lecture corps: " + String(parseErr?.message || parseErr) });
-      }
-
+      const body = await readJson(req);
       const content = body?.content;
       if (!content || typeof content !== "object" || Array.isArray(content)) {
-        console.log("[content PUT] invalid content. body:", JSON.stringify(body)?.slice(0, 200));
         return sendJson(res, 400, {
           ok: false,
           error: "Contenu manquant ou invalide",
         });
       }
 
-      const contentSize = JSON.stringify(content).length;
-      console.log("[content PUT] content size:", contentSize, "bytes, keys:", Object.keys(content).join(","));
-
       const result = await upsertSiteContent(content);
-      console.log("[content PUT] upsert result:", JSON.stringify(result));
-
       if (!result.ok) {
         return sendJson(res, 500, { ok: false, error: result.error });
       }
