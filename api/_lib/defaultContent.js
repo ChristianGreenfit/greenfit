@@ -100,6 +100,14 @@ export const defaultContent = {
         url: 'https://pilates-studio.ch',
         logo: true,
       },
+      {
+        title: 'SLA Skin & Laser Atelier',
+        text: 'Soins de la peau et traitements laser au sein de GreenFit, pour un accompagnement esthétique au même endroit.',
+        src: '/images/partenaires/sla-skin-laser-atelier.png',
+        alt: 'Logo SLA Skin & Laser Atelier',
+        url: 'https://skinlaseratelier.ch',
+        logo: true,
+      },
       // {
       // title: 'Julia',
       // text: 'Partenaire GreenFit. Nom d’activité, logo et site internet à compléter.',
