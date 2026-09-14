@@ -1,18 +1,13 @@
 import { useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
-import { useContent } from '../context/ContentContext'
+import { Link } from 'react-router-dom'
+import { useLocalizedContent } from '../i18n/useLocalizedContent'
+import { useLanguage } from '../i18n/LanguageContext'
 import './Navbar.css'
 
-function homeHref(hash) {
-  const path = hash.startsWith('#') ? hash : `#${hash}`
-  return `/${path}`
-}
-
 export default function Navbar() {
-  const { content } = useContent()
+  const { content } = useLocalizedContent()
   const { nav, site } = content
-  const { pathname } = useLocation()
-  const onHome = pathname === '/'
+  const { lang, home, isHome, t, switchTo } = useLanguage()
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
 
@@ -27,12 +22,31 @@ export default function Navbar() {
     document.body.style.overflow = open ? 'hidden' : ''
   }, [open])
 
-  const linkHref = (href) => (onHome ? href : homeHref(href))
+  const linkHref = (href) => (isHome ? href : `${home}${href.startsWith('#') ? href : `#${href}`}`)
+
+  const LangSwitch = () => (
+    <div className="nav__langs" role="group" aria-label="Language">
+      <Link
+        to={lang === 'fr' ? `${home}${window.location.hash || ''}` : switchTo}
+        className={lang === 'fr' ? 'is-active' : ''}
+        onClick={() => setOpen(false)}
+      >
+        FR
+      </Link>
+      <Link
+        to={lang === 'de' ? `${home}${window.location.hash || ''}` : switchTo}
+        className={lang === 'de' ? 'is-active' : ''}
+        onClick={() => setOpen(false)}
+      >
+        DE
+      </Link>
+    </div>
+  )
 
   return (
-    <header className={`nav ${scrolled || !onHome ? 'nav--scrolled' : ''}`}>
+    <header className={`nav ${scrolled || !isHome ? 'nav--scrolled' : ''}`}>
       <div className="container nav__inner">
-        <a href={onHome ? '#top' : '/'} className="brand" onClick={() => setOpen(false)}>
+        <a href={isHome ? '#top' : home} className="brand" onClick={() => setOpen(false)}>
           <span className="brand__logo" aria-hidden="true">
             <img src={site.logo} alt="" />
           </span>
@@ -52,15 +66,21 @@ export default function Navbar() {
           >
             {nav.ctaMobile}
           </a>
+          <div className="nav__langs nav__langs--mobile">
+            <LangSwitch />
+          </div>
         </nav>
 
         <div className="nav__right">
+          <div className="nav__langs nav__langs--desktop">
+            <LangSwitch />
+          </div>
           <a href={linkHref('#tarifs')} className="nav__cta">
             {nav.ctaDesktop}
           </a>
           <button
             className={`burger ${open ? 'is-open' : ''}`}
-            aria-label="Menu"
+            aria-label={t('menu')}
             onClick={() => setOpen((v) => !v)}
           >
             <span /><span /><span />

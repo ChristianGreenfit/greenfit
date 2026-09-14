@@ -1,8 +1,10 @@
-import { useContent } from '../context/ContentContext'
+import { useLocalizedContent } from '../i18n/useLocalizedContent'
+import { useLanguage } from '../i18n/LanguageContext'
 import './BienEtre.css'
 
 export default function BienEtre() {
-  const { content } = useContent()
+  const { content } = useLocalizedContent()
+  const { t } = useLanguage()
   const { bienEtre } = content
 
   return (
@@ -40,7 +42,7 @@ export default function BienEtre() {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    {item.url.includes('instagram.com') ? 'Instagram' : 'Site web'}
+                    {item.url.includes('instagram.com') ? t('instagram') : t('website')}
                   </a>
                 ) : null}
               </div>

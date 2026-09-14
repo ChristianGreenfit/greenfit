@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useReveal } from '../hooks/useReveal'
-import { useContent } from '../context/ContentContext'
+import { useLocalizedContent } from '../i18n/useLocalizedContent'
 import Navbar from '../components/Navbar'
 import Hero from '../components/Hero'
 import Centre from '../components/Centre'
@@ -12,7 +12,7 @@ import Contact from '../components/Contact'
 import Footer from '../components/Footer'
 
 export default function PublicSite() {
-  const { content } = useContent()
+  const { content } = useLocalizedContent()
   useReveal()
 
   useEffect(() => {

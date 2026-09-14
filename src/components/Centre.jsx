@@ -1,8 +1,8 @@
-import { useContent } from '../context/ContentContext'
+import { useLocalizedContent } from '../i18n/useLocalizedContent'
 import './Centre.css'
 
 export default function Centre() {
-  const { content } = useContent()
+  const { content } = useLocalizedContent()
   const { centre } = content
   const titleLines = centre.title.split('\n')
 

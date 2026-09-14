@@ -1,10 +1,9 @@
 import { useState } from 'react'
-import { useContent } from '../context/ContentContext'
+import { useLocalizedContent } from '../i18n/useLocalizedContent'
+import { useLanguage } from '../i18n/LanguageContext'
 import { sortSessions } from '../lib/planning'
 import Icon from './Icon'
 import './Planning.css'
-
-const DAY_NAMES = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 
 function getCurrentMonday() {
   const now = new Date()
@@ -17,14 +16,13 @@ function getCurrentMonday() {
 }
 
 function getTodayWeekIndex() {
-  // Lundi = 0 … Dimanche = 6
-  const jsDay = new Date().getDay() // Dim=0 … Sam=6
+  const jsDay = new Date().getDay()
   return jsDay === 0 ? 6 : jsDay - 1
 }
 
-function getWeekDates(offset) {
+function getWeekDates(offset, dayNames) {
   const monday = getCurrentMonday()
-  return DAY_NAMES.map((name, i) => {
+  return dayNames.map((name, i) => {
     const d = new Date(monday)
     d.setDate(monday.getDate() + offset * 7 + i)
     return { name, num: d.getDate() }
@@ -36,15 +34,17 @@ function sessionMatches(session, category) {
 }
 
 export default function Planning() {
-  const { content } = useContent()
+  const { content } = useLocalizedContent()
+  const { t } = useLanguage()
   const { planning } = content
   const { types: TYPES, categories: CATEGORIES, schedule: SCHEDULE } = planning
+  const dayNames = t('days')
 
   const [category, setCategory] = useState('all')
   const [selectedDay, setSelectedDay] = useState(getTodayWeekIndex)
   const [week, setWeek] = useState(0)
 
-  const dates = getWeekDates(week)
+  const dates = getWeekDates(week, dayNames)
   const todayIndex = week === 0 ? getTodayWeekIndex() : -1
 
   const sessionsForDay = (dayIndex) =>
@@ -81,7 +81,7 @@ export default function Planning() {
           <button
             className="planning__nav"
             onClick={() => setWeek((w) => w - 1)}
-            aria-label="Semaine précédente"
+            aria-label={t('prevWeek')}
           >
             <Icon name="arrow" size={18} className="flip" />
           </button>
@@ -143,7 +143,7 @@ export default function Planning() {
           <button
             className="planning__nav"
             onClick={() => setWeek((w) => w + 1)}
-            aria-label="Semaine suivante"
+            aria-label={t('nextWeek')}
           >
             <Icon name="arrow" size={18} />
           </button>
@@ -155,18 +155,18 @@ export default function Planning() {
               type="button"
               className="planning__mobile-nav"
               onClick={() => setWeek((w) => w - 1)}
-              aria-label="Semaine précédente"
+              aria-label={t('prevWeek')}
             >
               <Icon name="arrow" size={16} className="flip" />
             </button>
             <span className="planning__mobile-label">
-              Semaine du {dates[0].num} au {dates[6].num}
+              {t('weekOf', { a: dates[0].num, b: dates[6].num })}
             </span>
             <button
               type="button"
               className="planning__mobile-nav"
               onClick={() => setWeek((w) => w + 1)}
-              aria-label="Semaine suivante"
+              aria-label={t('nextWeek')}
             >
               <Icon name="arrow" size={16} />
             </button>

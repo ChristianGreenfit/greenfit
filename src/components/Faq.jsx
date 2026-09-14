@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { useContent } from '../context/ContentContext'
+import { useLocalizedContent } from '../i18n/useLocalizedContent'
 import './Faq.css'
 
 export default function Faq() {
-  const { content } = useContent()
+  const { content } = useLocalizedContent()
   const { faq } = content
   const [open, setOpen] = useState(-1)
 

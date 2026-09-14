@@ -1,8 +1,10 @@
-import { useContent } from '../context/ContentContext'
+import { useLocalizedContent } from '../i18n/useLocalizedContent'
+import { useLanguage } from '../i18n/LanguageContext'
 import './Contact.css'
 
 export default function Contact() {
-  const { content } = useContent()
+  const { content } = useLocalizedContent()
+  const { t } = useLanguage()
   const { contact } = content
 
   const titleParts = contact.title.split(contact.titleHighlight)
@@ -38,7 +40,7 @@ export default function Contact() {
         </div>
 
         <div className="contact__hours reveal">
-          <h3 className="contact__hours-title">Horaires réception</h3>
+          <h3 className="contact__hours-title">{t('hoursTitle')}</h3>
           <ul>
             {contact.receptionHours.map((slot) => (
               <li key={slot.days}>

@@ -1,10 +1,12 @@
 import { useEffect } from 'react'
-import { useContent } from '../context/ContentContext'
+import { useLocalizedContent } from '../i18n/useLocalizedContent'
+import { useLanguage } from '../i18n/LanguageContext'
 import Icon from './Icon'
 import './Hero.css'
 
 export default function Hero() {
-  const { content } = useContent()
+  const { content } = useLocalizedContent()
+  const { t } = useLanguage()
   const { hero } = content
 
   return (
@@ -62,7 +64,7 @@ export default function Hero() {
         </div>
       </div>
 
-      <a href="#centre" className="hero__scroll" aria-label="Défiler vers le bas">
+      <a href="#centre" className="hero__scroll" aria-label={t('scrollDown')}>
         <span />
       </a>
     </section>

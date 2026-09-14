@@ -1,14 +1,15 @@
 import { useLocation } from 'react-router-dom'
-import { useContent } from '../context/ContentContext'
+import { useLocalizedContent } from '../i18n/useLocalizedContent'
+import { useLanguage } from '../i18n/LanguageContext'
 import './Footer.css'
 
-function resolveHref(href, onHome) {
+function resolveHref(href, isHome, home) {
   if (!href || href === '#') return '#'
   if (href.startsWith('http') || href.startsWith('mailto:') || href.startsWith('tel:')) {
     return href
   }
-  if (href.startsWith('#') && !onHome) {
-    return `/${href}`
+  if (href.startsWith('#') && !isHome) {
+    return `${home}${href}`
   }
   return href
 }
@@ -21,17 +22,18 @@ function normalizeLink(link) {
 }
 
 export default function Footer() {
-  const { content } = useContent()
+  const { content } = useLocalizedContent()
   const { footer, contact, site } = content
+  const { home, isHome, t } = useLanguage()
   const { pathname } = useLocation()
-  const onHome = pathname === '/'
+  const onHome = pathname === '/' || pathname === '/de' || isHome
 
   return (
     <footer className="footer">
       <div className="container">
         <div className="footer__top">
           <div className="footer__brand">
-            <a href={onHome ? '#top' : '/'} className="brand brand--footer">
+            <a href={onHome ? '#top' : home} className="brand brand--footer">
               <span className="brand__logo" aria-hidden="true">
                 <img src={site.logo} alt="" />
               </span>
@@ -58,7 +60,7 @@ export default function Footer() {
                     const link = normalizeLink(raw)
                     return (
                       <li key={link.label}>
-                        <a href={resolveHref(link.href, onHome)}>{link.label}</a>
+                        <a href={resolveHref(link.href, onHome, home)}>{link.label}</a>
                       </li>
                     )
                   })}
@@ -70,15 +72,8 @@ export default function Footer() {
 
         <div className="footer__bottom">
           <p>
-            © {new Date().getFullYear()} {site.name}. Tous droits réservés.
+            © {new Date().getFullYear()} {site.name}. {t('rights')}
           </p>
-          {/* Pages légales pas encore créées
-          <div className="footer__legal">
-            <a href="#">Mentions légales</a>
-            <a href="#">Confidentialité</a>
-            <a href="#">CGV</a>
-          </div>
-          */}
         </div>
       </div>
     </footer>

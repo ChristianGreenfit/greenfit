@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useContent } from '../context/ContentContext'
+import { useLocalizedContent } from '../i18n/useLocalizedContent'
+import { useLanguage } from '../i18n/LanguageContext'
 import Icon from './Icon'
 import { useRecentSubscriptions } from '../hooks/useRecentSubscriptions'
 import './Tarifs.css'
 
-function TarifReduitWarning({ plan, onContinue, onClose }) {
+function TarifReduitWarning({ plan, onContinue, onClose, t }) {
   useEffect(() => {
     const onKeyDown = (e) => {
       if (e.key === 'Escape') onClose()
@@ -24,20 +25,17 @@ function TarifReduitWarning({ plan, onContinue, onClose }) {
         type="button"
         className="tarifs-modal__backdrop"
         onClick={onClose}
-        aria-label="Fermer"
+        aria-label={t('close')}
       />
       <div className="tarifs-modal__panel tarifs-warn-panel">
-        <button type="button" className="tarifs-modal__close" onClick={onClose} aria-label="Fermer">
+        <button type="button" className="tarifs-modal__close" onClick={onClose} aria-label={t('close')}>
           ×
         </button>
 
         <div className="tarifs-warn-panel__head">
           <p className="tarifs-warn-panel__plan">{plan.name}</p>
-          <h3 id="tarif-warn-title">Comment souhaitez-vous vous abonner&nbsp;?</h3>
-          <p className="tarifs-warn-panel__lead">
-            La réduction de 10&nbsp;% (AVS, étudiant, AI) n’est disponible qu’à la
-            réception, pas en paiement en ligne.
-          </p>
+          <h3 id="tarif-warn-title">{t('warnTitle')}</h3>
+          <p className="tarifs-warn-panel__lead">{t('warnLead')}</p>
         </div>
 
         <div className="tarifs-warn-panel__choices">
@@ -46,8 +44,8 @@ function TarifReduitWarning({ plan, onContinue, onClose }) {
               <Icon name="pin" size={20} stroke={1.8} />
             </span>
             <span className="tarifs-warn-choice__body">
-              <strong>À la réception</strong>
-              <span>−10&nbsp;% avec justificatif</span>
+              <strong>{t('warnReception')}</strong>
+              <span>{t('warnReceptionSub')}</span>
             </span>
           </button>
 
@@ -60,8 +58,8 @@ function TarifReduitWarning({ plan, onContinue, onClose }) {
               <Icon name="arrow" size={20} stroke={1.8} />
             </span>
             <span className="tarifs-warn-choice__body">
-              <strong>En ligne</strong>
-              <span>Tarif plein · {plan.price} CHF</span>
+              <strong>{t('warnOnline')}</strong>
+              <span>{t('warnOnlineSub', { price: plan.price })}</span>
             </span>
           </button>
         </div>
@@ -72,7 +70,8 @@ function TarifReduitWarning({ plan, onContinue, onClose }) {
 
 export default function Tarifs() {
   const navigate = useNavigate()
-  const { content } = useContent()
+  const { content } = useLocalizedContent()
+  const { t, to, lang } = useLanguage()
   const { tarifs } = content
   const { plans: PLANS, features: FEATURES, extras } = tarifs
 
@@ -99,23 +98,23 @@ export default function Tarifs() {
               className={`tarifs__card reveal ${p.featured ? 'is-featured' : ''}`}
               key={p.name}
             >
-              {p.featured && <span className="tarifs__ribbon">Populaire</span>}
+              {p.featured && <span className="tarifs__ribbon">{t('popular')}</span>}
               <h3>{p.name}</h3>
               <p className="tarifs__tagline">{p.tagline}</p>
               <div className="tarifs__price">
                 <span className="tarifs__amount">{p.price} CHF</span>
               </div>
               <p className="tarifs__equiv">
-                soit {Math.round(p.price / p.months)} CHF / mois
+                {t('perMonth', { n: Math.round(p.price / p.months) })}
               </p>
               {p.featured && (
                 <p className="tarifs__social">
                   <span className="tarifs__social-dot" aria-hidden="true" />
                   <span>
-                    <strong>
-                      {recentCount} personne{recentCount > 1 ? 's' : ''}
-                    </strong>{' '}
-                    ont choisi cet abonnement au cours des dernières 24 h
+                    {t('recentSubs', {
+                      n: recentCount,
+                      s: recentCount > 1 ? (lang === 'de' ? 'en' : 's') : '',
+                    })}
                   </span>
                 </p>
               )}
@@ -158,11 +157,12 @@ export default function Tarifs() {
       {pendingPlan && (
         <TarifReduitWarning
           plan={pendingPlan}
+          t={t}
           onClose={() => setPendingPlan(null)}
           onContinue={() => {
             const months = pendingPlan.months
             setPendingPlan(null)
-            navigate(`/checkout?plan=${months}`)
+            navigate(`${to('/checkout')}?plan=${months}`)
           }}
         />
       )}

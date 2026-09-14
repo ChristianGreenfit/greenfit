@@ -3,7 +3,8 @@ import { Link, Navigate, useSearchParams } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import Icon from '../components/Icon'
-import { useContent } from '../context/ContentContext'
+import { useLocalizedContent } from '../i18n/useLocalizedContent'
+import { useLanguage } from '../i18n/LanguageContext'
 import { createOrder } from '../lib/api'
 import './Checkout.css'
 
@@ -24,41 +25,41 @@ const EMPTY_FORM = {
   conditions_fitness: false,
 }
 
-function validate(form) {
+function validate(form, t) {
   const errors = {}
   const required = {
-    member_marital1: 'Civilité',
-    member_lastname: 'Nom',
-    member_firstname: 'Prénom',
-    member_email: 'Email',
-    member_phone: 'Téléphone',
-    member_dob: 'Date de naissance',
-    member_address: 'Adresse',
-    member_npa: 'NPA',
-    member_city: 'Ville',
+    member_marital1: t('civility'),
+    member_lastname: t('lastName'),
+    member_firstname: t('firstName'),
+    member_email: t('email'),
+    member_phone: t('phone'),
+    member_dob: t('dob'),
+    member_address: t('address'),
+    member_npa: t('npa'),
+    member_city: t('city'),
   }
 
   Object.entries(required).forEach(([key, label]) => {
     if (!form[key] || !String(form[key]).trim()) {
-      errors[key] = `${label} obligatoire`
+      errors[key] = t('required', { label })
     }
   })
 
   if (form.member_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.member_email)) {
-    errors.member_email = "Format d'email invalide"
+    errors.member_email = t('emailInvalid')
   }
 
   const digits = (form.member_phone || '').replace(/\D/g, '')
   if (form.member_phone && (digits.length !== 9 || digits[0] === '0')) {
-    errors.member_phone = '9 chiffres sans le 0 (ex : 79 123 45 67)'
+    errors.member_phone = t('phoneInvalid')
   }
 
   if (form.member_dob && !/^\d{2}\.\d{2}\.\d{4}$/.test(form.member_dob)) {
-    errors.member_dob = 'Format jj.mm.aaaa'
+    errors.member_dob = t('dobInvalid')
   }
 
   if (!form.conditions_fitness) {
-    errors.conditions_fitness = 'Vous devez accepter les conditions'
+    errors.conditions_fitness = t('conditionsRequired')
   }
 
   return errors
@@ -67,7 +68,8 @@ function validate(form) {
 export default function Checkout() {
   const [params] = useSearchParams()
   const months = Number(params.get('plan'))
-  const { content } = useContent()
+  const { content } = useLocalizedContent()
+  const { t, home } = useLanguage()
   const { plans, addons } = content.tarifs
 
   const plan = useMemo(
@@ -86,7 +88,7 @@ export default function Checkout() {
   }, [])
 
   if (!plan) {
-    return <Navigate to="/" replace />
+    return <Navigate to={home} replace />
   }
 
   const addonsTotal = selectedAddons.reduce((sum, id) => {
@@ -109,7 +111,7 @@ export default function Checkout() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSubmitError('')
-    const found = validate(form)
+    const found = validate(form, t)
     setErrors(found)
     if (Object.keys(found).length > 0) {
       document.getElementById('checkout-infos')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -130,7 +132,7 @@ export default function Checkout() {
     }
     setSubmitError(
       (result.errors && result.errors.join(' ')) ||
-        'Une erreur est survenue, réessayez.'
+        t('checkoutError'),
     )
   }
 
@@ -139,25 +141,25 @@ export default function Checkout() {
       <Navbar />
       <main className="checkout">
         <div className="container checkout__wrap">
-          <Link to="/#tarifs" className="checkout__back">
+          <Link to={`${home}#tarifs`} className="checkout__back">
             <Icon name="arrow" size={16} stroke={2} />
-            Retour aux tarifs
+            {t('checkoutBack')}
           </Link>
 
           <header className="checkout__header">
-            <span className="eyebrow">Inscription</span>
-            <h1>Finaliser votre abonnement</h1>
+            <span className="eyebrow">{t('checkoutEyebrow')}</span>
+            <h1>{t('checkoutTitle')}</h1>
             <p>
-              Abonnement <strong>{plan.name}</strong> · {formatChf(plan.price)}
+              {t('checkoutPlan', { name: plan.name, price: plan.price })}
             </p>
           </header>
 
           <form className="checkout__layout" onSubmit={handleSubmit} noValidate>
             <div className="checkout__main">
               <section className="checkout__block" aria-labelledby="checkout-options-title">
-                <h2 id="checkout-options-title">Options</h2>
+                <h2 id="checkout-options-title">{t('checkoutOptions')}</h2>
                 <p className="checkout__block-lead">
-                  Ajoutez des options à votre abonnement (facultatif).
+                  {t('checkoutOptionsLead')}
                 </p>
                 <ul className="checkout__options">
                   {addons.map((addon) => {
@@ -187,9 +189,9 @@ export default function Checkout() {
                 id="checkout-infos"
                 aria-labelledby="checkout-infos-title"
               >
-                <h2 id="checkout-infos-title">Vos informations</h2>
+                <h2 id="checkout-infos-title">{t('checkoutInfos')}</h2>
                 <p className="checkout__block-lead">
-                  Ces données seront utilisées pour créer votre contrat d’abonnement.
+                  {t('checkoutInfosLead')}
                 </p>
 
                 <div className="checkout__form">
@@ -222,14 +224,14 @@ export default function Checkout() {
                   )}
 
                   <div className="checkout__grid">
-                    <Field label="Prénom" error={errors.member_firstname}>
+                    <Field label={t('firstName')} error={errors.member_firstname}>
                       <input
                         value={form.member_firstname}
                         onChange={(e) => setField('member_firstname', e.target.value)}
                         autoComplete="given-name"
                       />
                     </Field>
-                    <Field label="Nom" error={errors.member_lastname}>
+                    <Field label={t('lastName')} error={errors.member_lastname}>
                       <input
                         value={form.member_lastname}
                         onChange={(e) => setField('member_lastname', e.target.value)}
@@ -239,7 +241,7 @@ export default function Checkout() {
                   </div>
 
                   <div className="checkout__grid">
-                    <Field label="Email" error={errors.member_email}>
+                    <Field label={t('email')} error={errors.member_email}>
                       <input
                         type="email"
                         value={form.member_email}
@@ -248,9 +250,9 @@ export default function Checkout() {
                       />
                     </Field>
                     <Field
-                      label="Téléphone"
+                      label={t('phone')}
                       error={errors.member_phone}
-                      hint="Sans le 0, ex : 79 123 45 67"
+                      hint={t('phoneHint')}
                     >
                       <input
                         value={form.member_phone}
@@ -261,7 +263,7 @@ export default function Checkout() {
                     </Field>
                   </div>
 
-                  <Field label="Date de naissance" error={errors.member_dob} hint="jj.mm.aaaa">
+                  <Field label={t('dob')} error={errors.member_dob} hint={t('dobHint')}>
                     <input
                       value={form.member_dob}
                       onChange={(e) => setField('member_dob', e.target.value)}
@@ -269,7 +271,7 @@ export default function Checkout() {
                     />
                   </Field>
 
-                  <Field label="Adresse" error={errors.member_address}>
+                  <Field label={t('address')} error={errors.member_address}>
                     <input
                       value={form.member_address}
                       onChange={(e) => setField('member_address', e.target.value)}
@@ -278,14 +280,14 @@ export default function Checkout() {
                   </Field>
 
                   <div className="checkout__grid">
-                    <Field label="NPA" error={errors.member_npa}>
+                    <Field label={t('npa')} error={errors.member_npa}>
                       <input
                         value={form.member_npa}
                         onChange={(e) => setField('member_npa', e.target.value)}
                         autoComplete="postal-code"
                       />
                     </Field>
-                    <Field label="Ville" error={errors.member_city}>
+                    <Field label={t('city')} error={errors.member_city}>
                       <input
                         value={form.member_city}
                         onChange={(e) => setField('member_city', e.target.value)}
@@ -303,9 +305,9 @@ export default function Checkout() {
                       onChange={(e) => setField('conditions_fitness', e.target.checked)}
                     />
                     <span>
-                      J&apos;accepte les{' '}
+                      {t('conditionsAccept')}{' '}
                       <a href="/pdf/condition.pdf" target="_blank" rel="noopener noreferrer">
-                        Conditions de GreenFit
+                        {t('conditionsLink')}
                       </a>
                     </span>
                   </label>
@@ -318,9 +320,9 @@ export default function Checkout() {
 
             <aside className="checkout__aside">
               <div className="checkout__summary">
-                <h2>Récapitulatif</h2>
+                <h2>{t('summary')}</h2>
                 <div className="checkout__summary-row">
-                  <span>Abonnement {plan.name}</span>
+                  <span>{t('subscription', { name: plan.name })}</span>
                   <span>{formatChf(plan.price)}</span>
                 </div>
                 {selectedAddons.map((id) => {
@@ -334,19 +336,18 @@ export default function Checkout() {
                   )
                 })}
                 <div className="checkout__summary-row checkout__summary-row--total">
-                  <span>Total</span>
+                  <span>{t('total')}</span>
                   <span>{formatChf(total)}</span>
                 </div>
 
                 <p className="checkout__summary-note">
-                  Tarif plein en ligne. Les −10&nbsp;% (AVS, étudiant, AI) sont
-                  uniquement disponibles à la réception.
+                  {t('checkoutNote')}
                 </p>
 
                 {submitError && <div className="checkout__submit-error">{submitError}</div>}
 
                 <button type="submit" className="btn btn--primary checkout__pay" disabled={loading}>
-                  {loading ? 'Redirection…' : 'Procéder au paiement'}
+                  {loading ? t('redirecting') : t('pay')}
                   {!loading && (
                     <span className="arrow">
                       <Icon name="arrow" size={15} stroke={2} />
