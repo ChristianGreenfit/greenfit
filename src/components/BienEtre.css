@@ -56,8 +56,9 @@
 
 .bienetre__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  align-items: stretch;
 }
 
 .bienetre__card {
@@ -91,18 +92,19 @@
 .bienetre__card-media--logo {
   display: grid;
   place-items: center;
-  min-height: 180px;
+  height: 200px;
+  min-height: 200px;
   background: var(--white);
   border-bottom: 1px solid var(--line);
 }
 
 .bienetre__card-media--logo img {
   width: auto;
-  max-width: 70%;
+  max-width: 78%;
   height: auto;
-  max-height: 120px;
+  max-height: 150px;
   object-fit: contain;
-  padding: 24px;
+  padding: 20px;
 }
 
 .bienetre__card:hover .bienetre__card-media:not(.bienetre__card-media--logo) img {
@@ -152,21 +154,24 @@
     align-items: flex-start;
     gap: 24px;
   }
-
-  .bienetre__grid {
-    grid-template-columns: 1fr;
-    max-width: none;
-    width: 100%;
-  }
-
-  .bienetre__card-media img {
-    height: 200px;
-  }
 }
 
 @media (max-width: 640px) {
   .bienetre {
     padding: 64px 0;
+  }
+
+  .bienetre__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bienetre__card-media img {
+    height: 200px;
+  }
+
+  .bienetre__card-media--logo {
+    height: 180px;
+    min-height: 180px;
   }
 
   .bienetre__cta {

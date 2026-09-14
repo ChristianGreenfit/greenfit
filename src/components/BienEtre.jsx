@@ -40,7 +40,7 @@ export default function BienEtre() {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    Site web
+                    {item.url.includes('instagram.com') ? 'Instagram' : 'Site web'}
                   </a>
                 ) : null}
               </div>
