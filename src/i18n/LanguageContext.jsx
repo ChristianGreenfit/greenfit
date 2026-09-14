@@ -3,24 +3,43 @@ import { useLocation } from 'react-router-dom'
 import { t } from './ui'
 
 const LanguageContext = createContext(null)
+const LANGS = ['fr', 'de']
 
 export function langFromPath(pathname) {
-  if (pathname === '/de' || pathname.startsWith('/de/')) return 'de'
-  return 'fr'
+  const first = pathname.split('/').filter(Boolean)[0]
+  return first === 'de' ? 'de' : 'fr'
 }
 
 export function homePath(lang) {
-  return lang === 'de' ? '/de' : '/'
+  return lang === 'de' ? '/de' : '/fr'
+}
+
+function splitPath(path) {
+  const raw = path.startsWith('/') ? path : `/${path}`
+  const q = raw.indexOf('?')
+  const pathname = q >= 0 ? raw.slice(0, q) : raw
+  const search = q >= 0 ? raw.slice(q) : ''
+  return { pathname, search }
+}
+
+export function stripLangPrefix(pathname) {
+  const parts = pathname.split('/')
+  if (LANGS.includes(parts[1])) {
+    const rest = `/${parts.slice(2).join('/')}`.replace(/\/$/, '')
+    return rest || '/'
+  }
+  return pathname || '/'
 }
 
 export function localizePath(path, lang) {
-  const raw = path.startsWith('/') ? path : `/${path}`
-  if (raw === '/admin' || raw.startsWith('/admin/')) return raw
-  const stripped = raw === '/de' || raw.startsWith('/de/') ? raw.slice(3) || '/' : raw
-  if (lang === 'de') {
-    return stripped === '/' ? '/de' : `/de${stripped}`
+  const { pathname, search } = splitPath(path)
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+    return pathname + search
   }
-  return stripped
+  const stripped = stripLangPrefix(pathname)
+  const prefix = `/${lang}`
+  const localized = stripped === '/' ? prefix : `${prefix}${stripped}`
+  return localized + search
 }
 
 export function LanguageProvider({ children }) {
@@ -33,7 +52,7 @@ export function LanguageProvider({ children }) {
 
   const value = useMemo(() => {
     const home = homePath(lang)
-    const isHome = pathname === '/' || pathname === '/de'
+    const isHome = pathname === '/fr' || pathname === '/de'
     const otherLang = lang === 'de' ? 'fr' : 'de'
     const switchTo = `${localizePath(`${pathname}${search}`, otherLang)}${hash || ''}`
 
@@ -57,10 +76,10 @@ export function useLanguage() {
   if (!ctx) {
     return {
       lang: 'fr',
-      home: '/',
+      home: '/fr',
       isHome: true,
       t: (key, vars) => t('fr', key, vars),
-      to: (path) => path,
+      to: (path) => localizePath(path, 'fr'),
       switchTo: '/de',
     }
   }

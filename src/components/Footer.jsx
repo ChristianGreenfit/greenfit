@@ -26,7 +26,7 @@ export default function Footer() {
   const { footer, contact, site } = content
   const { home, isHome, t } = useLanguage()
   const { pathname } = useLocation()
-  const onHome = pathname === '/' || pathname === '/de' || isHome
+  const onHome = pathname === '/fr' || pathname === '/de' || isHome
 
   return (
     <footer className="footer">
