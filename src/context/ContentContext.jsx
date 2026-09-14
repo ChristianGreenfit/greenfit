@@ -27,6 +27,7 @@ function normalizeContent(raw) {
     content.bienEtre.offers = content.bienEtre.offers.map((offer) => ({
       url: '',
       logo: false,
+      logoLarge: false,
       ...offer,
     }))
   }

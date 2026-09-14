@@ -107,6 +107,12 @@
   padding: 20px;
 }
 
+.bienetre__card-media--logo-lg img {
+  max-width: 94%;
+  max-height: 188px;
+  padding: 8px 12px;
+}
+
 .bienetre__card:hover .bienetre__card-media:not(.bienetre__card-media--logo) img {
   transform: scale(1.03);
 }

@@ -26,7 +26,7 @@ export default function BienEtre() {
           {bienEtre.offers.map((item) => (
             <article className="bienetre__card reveal" key={item.title}>
               <figure
-                className={`bienetre__card-media${item.logo ? ' bienetre__card-media--logo' : ''}`}
+                className={`bienetre__card-media${item.logo ? ' bienetre__card-media--logo' : ''}${item.logoLarge ? ' bienetre__card-media--logo-lg' : ''}`}
               >
                 <img src={item.src} alt={item.alt} loading="lazy" />
               </figure>

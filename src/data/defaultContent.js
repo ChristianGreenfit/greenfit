@@ -115,6 +115,7 @@ export const defaultContent = {
         alt: 'Logo Body & Soul by Vera Silva',
         url: 'https://www.instagram.com/bodyandsoulsilva/',
         logo: true,
+        logoLarge: true,
       },
       // {
       // title: 'Julia',
