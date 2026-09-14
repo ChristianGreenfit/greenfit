@@ -40,10 +40,18 @@ export function localizeContent(fr, lang) {
     })
   }
 
-  if (fr.tarifs?.plans) {
-    de.tarifs.plans = de.tarifs.plans.map((plan) => {
-      const live = fr.tarifs.plans.find((p) => p.months === plan.months)
-      return live ? { ...plan, price: live.price, featured: live.featured } : plan
+  if (fr.tarifs?.plans?.length) {
+    de.tarifs.plans = fr.tarifs.plans.map((live) => {
+      const tr = de.tarifs.plans.find(
+        (p) => Number(p.months) === Number(live.months),
+      )
+      return {
+        ...live,
+        name: tr?.name ?? live.name,
+        tagline: tr?.tagline ?? live.tagline,
+        cta: tr?.cta ?? live.cta,
+        months: Number(live.months),
+      }
     })
   }
   if (fr.tarifs?.addons) {

@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useReveal } from '../hooks/useReveal'
 import { useLocalizedContent } from '../i18n/useLocalizedContent'
+import { useLanguage } from '../i18n/LanguageContext'
 import Navbar from '../components/Navbar'
 import Hero from '../components/Hero'
 import Centre from '../components/Centre'
@@ -13,7 +14,8 @@ import Footer from '../components/Footer'
 
 export default function PublicSite() {
   const { content } = useLocalizedContent()
-  useReveal()
+  const { lang } = useLanguage()
+  useReveal(lang)
 
   useEffect(() => {
     document.title = content.site.seo.title

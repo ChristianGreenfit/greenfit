@@ -12,8 +12,8 @@ export default function App() {
       <BrowserRouter>
         <LanguageProvider>
           <Routes>
-            <Route path="/" element={<PublicSite />} />
-            <Route path="/de" element={<PublicSite />} />
+            <Route path="/" element={<PublicSite key="fr" />} />
+            <Route path="/de" element={<PublicSite key="de" />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/de/checkout" element={<Checkout />} />
             <Route path="/resultat" element={<Resultat />} />
