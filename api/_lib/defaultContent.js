@@ -108,6 +108,14 @@ export const defaultContent = {
         url: 'https://skinlaseratelier.ch',
         logo: true,
       },
+      {
+        title: 'Body & Soul by Vera Silva',
+        text: 'Massothérapie au sein de GreenFit, pour relâcher les tensions et prendre soin du corps après l’effort.',
+        src: '/images/partenaires/body-and-soul-vera-silva.png',
+        alt: 'Logo Body & Soul by Vera Silva',
+        url: 'https://www.instagram.com/bodyandsoulsilva/',
+        logo: true,
+      },
       // {
       // title: 'Julia',
       // text: 'Partenaire GreenFit. Nom d’activité, logo et site internet à compléter.',
