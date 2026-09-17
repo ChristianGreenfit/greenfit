@@ -4,14 +4,31 @@ import { useLanguage } from '../i18n/LanguageContext'
 import Icon from './Icon'
 import './BienEtre.css'
 
-function cardIndexFromScroll(track) {
+function visibleCardCount(track) {
+  const card = track?.children?.[0]
+  if (!card) return 1
+  const gap = parseFloat(getComputedStyle(track).gap) || 0
+  const width = card.getBoundingClientRect().width + gap
+  if (width < 8) return 1
+  return Math.max(1, Math.round((track.clientWidth + gap) / width))
+}
+
+function maxSlideIndex(track) {
+  const n = track?.children?.length || 0
+  if (n <= 1) return 0
+  return Math.max(0, n - visibleCardCount(track))
+}
+
+function slideIndexFromScroll(track) {
   if (!track) return 0
   const cards = [...track.children]
   if (!cards.length) return 0
   const left = track.scrollLeft
+  const max = maxSlideIndex(track)
   let best = 0
   let bestDist = Infinity
   cards.forEach((card, i) => {
+    if (i > max) return
     const dist = Math.abs(card.offsetLeft - left)
     if (dist < bestDist) {
       bestDist = dist
@@ -28,13 +45,21 @@ export default function BienEtre() {
   const offers = bienEtre.offers || []
   const trackRef = useRef(null)
   const [index, setIndex] = useState(0)
+  const [maxIndex, setMaxIndex] = useState(0)
+
+  const measure = () => {
+    const track = trackRef.current
+    if (!track) return
+    const nextMax = maxSlideIndex(track)
+    setMaxIndex(nextMax)
+    setIndex((i) => Math.min(i, nextMax))
+  }
 
   const goTo = (i) => {
     const track = trackRef.current
     if (!track) return
-    const cards = track.children
-    const next = Math.max(0, Math.min(i, cards.length - 1))
-    const card = cards[next]
+    const next = Math.max(0, Math.min(i, maxSlideIndex(track)))
+    const card = track.children[next]
     if (card) {
       track.scrollTo({ left: card.offsetLeft, behavior: 'smooth' })
     }
@@ -44,9 +69,15 @@ export default function BienEtre() {
   useEffect(() => {
     const track = trackRef.current
     if (!track) return undefined
-    const onScroll = () => setIndex(cardIndexFromScroll(track))
+    measure()
+    const onScroll = () => setIndex(slideIndexFromScroll(track))
+    const ro = new ResizeObserver(measure)
+    ro.observe(track)
     track.addEventListener('scroll', onScroll, { passive: true })
-    return () => track.removeEventListener('scroll', onScroll)
+    return () => {
+      ro.disconnect()
+      track.removeEventListener('scroll', onScroll)
+    }
   }, [offers.length])
 
   return (
@@ -109,21 +140,21 @@ export default function BienEtre() {
             type="button"
             className="bienetre__nav"
             onClick={() => goTo(index + 1)}
-            disabled={index >= offers.length - 1}
+            disabled={index >= maxIndex}
             aria-label={t('nextPartner')}
           >
             <Icon name="arrow" size={18} />
           </button>
         </div>
 
-        {offers.length > 1 ? (
+        {maxIndex > 0 ? (
           <div className="bienetre__dots" role="tablist" aria-label={bienEtre.label}>
-            {offers.map((item, i) => (
+            {Array.from({ length: maxIndex + 1 }, (_, i) => (
               <button
-                key={item.title}
+                key={offers[i]?.title || i}
                 type="button"
                 className={`bienetre__dot ${i === index ? 'is-active' : ''}`}
-                aria-label={item.title}
+                aria-label={offers[i]?.title || `${i + 1}`}
                 aria-current={i === index ? 'true' : undefined}
                 onClick={() => goTo(i)}
               />
