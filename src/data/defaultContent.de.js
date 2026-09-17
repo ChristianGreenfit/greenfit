@@ -117,6 +117,15 @@ export const defaultContentDe = {
         logo: true,
         logoLarge: true,
       },
+      {
+        title: 'J. Lang Beauty & Care',
+        text: 'Beauty- und Pflegebehandlungen in GreenFit, für Haut und Aussehen.',
+        src: '/images/partenaires/j-lang-beauty-care.png',
+        alt: 'Logo J. Lang Beauty & Care',
+        url: 'https://share.google/p2RYEaAlQBbfyfgYA',
+        logo: true,
+        logoLarge: true,
+      },
     ],
   },
 
