@@ -19,22 +19,30 @@ function maxSlideIndex(track) {
   return Math.max(0, n - visibleCardCount(track))
 }
 
+function slideScrollLeft(track, i) {
+  if (!track || i <= 0) return 0
+  const origin = track.children[0]
+  const card = track.children[i]
+  if (!origin || !card) return 0
+  const maxLeft = Math.max(0, track.scrollWidth - track.clientWidth)
+  const left = card.getBoundingClientRect().left - origin.getBoundingClientRect().left
+  return Math.min(Math.max(0, left), maxLeft)
+}
+
 function slideIndexFromScroll(track) {
-  if (!track) return 0
-  const cards = [...track.children]
-  if (!cards.length) return 0
+  if (!track?.children?.length) return 0
   const left = track.scrollLeft
+  if (left <= 8) return 0
   const max = maxSlideIndex(track)
   let best = 0
   let bestDist = Infinity
-  cards.forEach((card, i) => {
-    if (i > max) return
-    const dist = Math.abs(card.offsetLeft - left)
+  for (let i = 0; i <= max; i += 1) {
+    const dist = Math.abs(slideScrollLeft(track, i) - left)
     if (dist < bestDist) {
       bestDist = dist
       best = i
     }
-  })
+  }
   return best
 }
 
@@ -44,6 +52,7 @@ export default function BienEtre() {
   const { bienEtre } = content
   const offers = bienEtre.offers || []
   const trackRef = useRef(null)
+  const animatingRef = useRef(false)
   const [index, setIndex] = useState(0)
   const [maxIndex, setMaxIndex] = useState(0)
 
@@ -59,18 +68,43 @@ export default function BienEtre() {
     const track = trackRef.current
     if (!track) return
     const next = Math.max(0, Math.min(i, maxSlideIndex(track)))
-    const card = track.children[next]
-    if (card) {
-      track.scrollTo({ left: card.offsetLeft, behavior: 'smooth' })
-    }
+    const left = slideScrollLeft(track, next)
+    animatingRef.current = true
     setIndex(next)
+    track.style.scrollSnapType = 'none'
+    track.scrollTo({ left, behavior: 'smooth' })
+
+    let finished = false
+    const finish = () => {
+      if (finished || trackRef.current !== track) return
+      finished = true
+      if (Math.abs(track.scrollLeft - left) > 2) {
+        track.scrollLeft = left
+      }
+      track.style.scrollSnapType = ''
+      animatingRef.current = false
+      setIndex(slideIndexFromScroll(track))
+    }
+
+    const onEnd = () => {
+      track.removeEventListener('scrollend', onEnd)
+      finish()
+    }
+    track.addEventListener('scrollend', onEnd)
+    window.setTimeout(() => {
+      track.removeEventListener('scrollend', onEnd)
+      finish()
+    }, 450)
   }
 
   useEffect(() => {
     const track = trackRef.current
     if (!track) return undefined
     measure()
-    const onScroll = () => setIndex(slideIndexFromScroll(track))
+    const onScroll = () => {
+      if (animatingRef.current) return
+      setIndex(slideIndexFromScroll(track))
+    }
     const ro = new ResizeObserver(measure)
     ro.observe(track)
     track.addEventListener('scroll', onScroll, { passive: true })
