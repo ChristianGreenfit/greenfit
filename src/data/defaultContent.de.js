@@ -119,7 +119,7 @@ export const defaultContentDe = {
       },
       {
         title: 'J. Lang Beauty & Care',
-        text: 'Beauty- und Pflegebehandlungen in GreenFit, für Haut und Aussehen.',
+        text: 'Praxis für Hand- und Fusspflege (anerkannt durch die SFPV – Schweizerischer Verband für Fusspflege) in GreenFit.',
         src: '/images/partenaires/j-lang-beauty-care.png',
         alt: 'Logo J. Lang Beauty & Care',
         url: 'https://share.google/p2RYEaAlQBbfyfgYA',

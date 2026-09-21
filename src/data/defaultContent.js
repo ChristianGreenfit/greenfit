@@ -119,7 +119,7 @@ export const defaultContent = {
       },
       {
         title: 'J. Lang Beauty & Care',
-        text: 'Soins de beauté et care au sein de GreenFit, pour prendre soin de votre peau et de votre apparence.',
+        text: 'Cabinet de soins des mains et des pieds (reconnu par la SFPV – Association suisse des soins des pieds) au sein de GreenFit.',
         src: '/images/partenaires/j-lang-beauty-care.png',
         alt: 'Logo J. Lang Beauty & Care',
         url: 'https://share.google/p2RYEaAlQBbfyfgYA',
