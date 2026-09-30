@@ -42,8 +42,8 @@ function buildOrderedParams(p) {
     ["sLogin", config.soap.login], // "-1"
     ["sMotdePasse", config.soap.password], // ""
     ["sMethodeChiffrage", "0"], // 0 = en clair (comme le plugin)
-    ["sEnvoieEmailClient", "1"],
-    ["sEnvoieEmailCentre", "1"],
+    ["sEnvoieEmailClient", p.sendClientEmail ?? "1"],
+    ["sEnvoieEmailCentre", p.sendCentreEmail ?? "1"],
     ["sRenouvellement", "0"],
   ];
 }

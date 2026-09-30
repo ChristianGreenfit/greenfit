@@ -69,6 +69,17 @@ export default async function handler(req, res) {
 
     const paidCents = paidCentsFromTransaction(transaction, order.amount);
     const paidChf = Number(paidCents) / 100;
+    const optionsTotal = (info.options ?? []).reduce(
+      (s, o) => s + Number(o.price || 0),
+      0,
+    );
+    const gsinfoChf =
+      info.gsinfo_amount != null
+        ? Number(info.gsinfo_amount)
+        : Number(info.month_price || 0) + optionsTotal;
+    const gsinfoCents = Math.round(
+      (gsinfoChf > 0 ? gsinfoChf : paidChf) * 100,
+    ).toString();
 
     const contract = await createContract({
       contractId: String(info.contract_id ?? ""),
@@ -81,7 +92,9 @@ export default async function handler(req, res) {
       email: user.email,
       telephone: u.member_phone ?? "",
       dateNaissanceYmd: dobToYmd(u.member_dob ?? ""),
-      montantCents: paidCents,
+      // gsinfo compare au prix du modèle (850). On déclare ce total
+      // comme payé pour soldé le contrat ; Saferpay encaisse le tarif promo.
+      montantCents: gsinfoCents,
       articleIds,
     });
 
