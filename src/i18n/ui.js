@@ -7,6 +7,9 @@ export const ui = {
     nextPartner: 'Partenaire suivant',
     scrollDown: 'Défiler vers le bas',
     popular: 'Populaire',
+    octoberOffer: "OFFRE D'OCTOBRE",
+    octoberOfferLine: "Offre d'octobre",
+    octoberOfferUntil: "Valable jusqu'au 31 octobre",
     perMonth: 'soit {n} CHF / mois',
     recentSubs:
       '{n} personne{s} ont choisi cet abonnement au cours des dernières 24 h',
@@ -56,6 +59,8 @@ export const ui = {
     total: 'Total',
     checkoutNote:
       'Tarif plein en ligne. Les −10 % (AVS, étudiant, AI) sont uniquement disponibles à la réception.',
+    checkoutNotePromo:
+      'Offre d’octobre : −100 CHF sur l’abonnement 12 mois, jusqu’au 31 octobre. Les −10 % (AVS, étudiant, AI) restent uniquement à la réception.',
     pay: 'Procéder au paiement',
     redirecting: 'Redirection…',
     checkoutError: 'Une erreur est survenue, réessayez.',
@@ -77,6 +82,9 @@ export const ui = {
     nextPartner: 'Nächster Partner',
     scrollDown: 'Nach unten scrollen',
     popular: 'Beliebt',
+    octoberOffer: 'OKTOBER-ANGEBOT',
+    octoberOfferLine: 'Oktober-Angebot',
+    octoberOfferUntil: 'Gültig bis 31. Oktober',
     perMonth: 'entspricht {n} CHF / Monat',
     recentSubs:
       '{n} Person{s} haben dieses Abo in den letzten 24 Stunden gewählt',
@@ -126,6 +134,8 @@ export const ui = {
     total: 'Total',
     checkoutNote:
       'Online zum Vollpreis. Die −10 % (AHV, Studierende, IV) gibt es nur an der Rezeption.',
+    checkoutNotePromo:
+      'Oktober-Angebot: −100 CHF auf das 12-Monats-Abo, bis 31. Oktober. Die −10 % (AHV, Studierende, IV) gibt es weiterhin nur an der Rezeption.',
     pay: 'Zur Zahlung',
     redirecting: 'Weiterleitung…',
     checkoutError: 'Ein Fehler ist aufgetreten, bitte erneut versuchen.',

@@ -106,6 +106,13 @@ export function initialize(p) {
 }
 
 // Étape 2 — Assert : vérifie le résultat du paiement
+/** Montant encaissé Saferpay (centimes), sinon repli sur notre total interne. */
+export function paidCentsFromTransaction(transaction, fallbackChf) {
+  const n = Number.parseInt(String(transaction?.Amount?.Value ?? ""), 10)
+  if (Number.isFinite(n) && n > 0) return String(n)
+  return String(Math.round(Number(fallbackChf) * 100))
+}
+
 export function assert(token) {
   return call("/Payment/v1/PaymentPage/Assert", {
     RequestHeader: requestHeader(),

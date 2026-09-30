@@ -4,6 +4,7 @@ import { useLocalizedContent } from '../i18n/useLocalizedContent'
 import { useLanguage } from '../i18n/LanguageContext'
 import Icon from './Icon'
 import { useRecentSubscriptions } from '../hooks/useRecentSubscriptions'
+import { applyPlanPromo } from '../lib/promo'
 import './Tarifs.css'
 
 function TarifReduitWarning({ plan, onContinue, onClose, t }) {
@@ -59,7 +60,7 @@ function TarifReduitWarning({ plan, onContinue, onClose, t }) {
             </span>
             <span className="tarifs-warn-choice__body">
               <strong>{t('warnOnline')}</strong>
-              <span>{t('warnOnlineSub', { price: plan.price })}</span>
+              <span>{t('warnOnlineSub', { price: applyPlanPromo(plan).price })}</span>
             </span>
           </button>
         </div>
@@ -93,20 +94,36 @@ export default function Tarifs() {
         </div>
 
         <div className="tarifs__grid">
-          {PLANS.map((p) => (
+          {PLANS.map((p) => {
+            const promo = applyPlanPromo(p)
+            return (
             <article
-              className={`tarifs__card reveal ${p.featured ? 'is-featured' : ''}`}
+              className={`tarifs__card reveal ${p.featured ? 'is-featured' : ''}${promo.active ? ' has-offer' : ''}`}
               key={p.name}
             >
-              {p.featured && <span className="tarifs__ribbon">{t('popular')}</span>}
+              {promo.active ? (
+                <span className="tarifs__ribbon tarifs__ribbon--offer">{t('octoberOffer')}</span>
+              ) : (
+                p.featured && <span className="tarifs__ribbon">{t('popular')}</span>
+              )}
               <h3>{p.name}</h3>
               <p className="tarifs__tagline">{p.tagline}</p>
               <div className="tarifs__price">
-                <span className="tarifs__amount">{p.price} CHF</span>
+                {promo.active ? (
+                  <>
+                    <span className="tarifs__amount-old">{p.price} CHF</span>
+                    <span className="tarifs__amount">{promo.price} CHF</span>
+                  </>
+                ) : (
+                  <span className="tarifs__amount">{p.price} CHF</span>
+                )}
               </div>
               <p className="tarifs__equiv">
-                {t('perMonth', { n: Math.round(p.price / p.months) })}
+                {t('perMonth', { n: Math.round((promo.active ? promo.price : p.price) / p.months) })}
               </p>
+              {promo.active ? (
+                <p className="tarifs__offer-until">{t('octoberOfferUntil')}</p>
+              ) : null}
               {p.featured && (
                 <p className="tarifs__social">
                   <span className="tarifs__social-dot" aria-hidden="true" />
@@ -136,7 +153,8 @@ export default function Tarifs() {
                 ))}
               </ul>
             </article>
-          ))}
+            )
+          })}
         </div>
 
         <div className="tarifs__extras reveal">

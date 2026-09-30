@@ -9,7 +9,7 @@
 // ============================================================
 
 import { db, STATUS } from "./_lib/db.js";
-import { assert, capture } from "./_lib/saferpay.js";
+import { assert, capture, paidCentsFromTransaction } from "./_lib/saferpay.js";
 import { createContract } from "./_lib/contract.js";
 import { sendOrderEmails } from "./_lib/email.js";
 import { dobToYmd } from "./_lib/validation.js";
@@ -67,6 +67,9 @@ export default async function handler(req, res) {
       .map((o) => o.contract_id)
       .filter(Boolean);
 
+    const paidCents = paidCentsFromTransaction(transaction, order.amount);
+    const paidChf = Number(paidCents) / 100;
+
     const contract = await createContract({
       contractId: String(info.contract_id ?? ""),
       civilite: u.member_marital1 ?? "",
@@ -78,7 +81,7 @@ export default async function handler(req, res) {
       email: user.email,
       telephone: u.member_phone ?? "",
       dateNaissanceYmd: dobToYmd(u.member_dob ?? ""),
-      montantCents: Math.round(Number(order.amount) * 100).toString(),
+      montantCents: paidCents,
       articleIds,
     });
 
@@ -86,7 +89,7 @@ export default async function handler(req, res) {
       orderId: order.id,
       contractId: String(info.contract_id ?? ""),
       title: String(info.title ?? "Abonnement"),
-      price: Number(order.amount),
+      price: paidChf,
       extraFee: Number(info.extra_fee ?? 0),
       optionsList: (info.options ?? []).map((o) => `${o.title} (CHF ${o.price})`),
       civilite: u.member_marital1 ?? "",
