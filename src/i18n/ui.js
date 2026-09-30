@@ -8,8 +8,7 @@ export const ui = {
     scrollDown: 'Défiler vers le bas',
     popular: 'Populaire',
     octoberOffer: "OFFRE D'OCTOBRE",
-    octoberOfferLine: "Offre d'octobre",
-    octoberOfferUntil: "Valable jusqu'au 31 octobre",
+    octoberOfferUntil: "Uniquement à l’accueil du fitness, jusqu’au 31 octobre",
     perMonth: 'soit {n} CHF / mois',
     recentSubs:
       '{n} personne{s} ont choisi cet abonnement au cours des dernières 24 h',
@@ -17,8 +16,11 @@ export const ui = {
     warnTitle: 'Comment souhaitez-vous vous abonner ?',
     warnLead:
       'La réduction de 10 % (AVS, étudiant, AI) n’est disponible qu’à la réception, pas en paiement en ligne.',
+    warnLeadPromo:
+      'L’offre d’octobre (−100 CHF sur 12 mois) et les −10 % (AVS, étudiant, AI) sont uniquement à l’accueil du fitness, pas en ligne.',
     warnReception: 'À la réception',
     warnReceptionSub: '−10 % avec justificatif',
+    warnReceptionSubPromo: 'Offre −100 CHF (12 mois) et −10 % avec justificatif',
     warnOnline: 'En ligne',
     warnOnlineSub: 'Tarif plein · {price} CHF',
     days: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
@@ -60,7 +62,7 @@ export const ui = {
     checkoutNote:
       'Tarif plein en ligne. Les −10 % (AVS, étudiant, AI) sont uniquement disponibles à la réception.',
     checkoutNotePromo:
-      'Offre d’octobre : −100 CHF sur l’abonnement 12 mois, jusqu’au 31 octobre. Les −10 % (AVS, étudiant, AI) restent uniquement à la réception.',
+      'Tarif plein en ligne. L’offre −100 CHF (12 mois) et les −10 % (AVS, étudiant, AI) sont uniquement à l’accueil du fitness.',
     pay: 'Procéder au paiement',
     redirecting: 'Redirection…',
     checkoutError: 'Une erreur est survenue, réessayez.',
@@ -83,8 +85,7 @@ export const ui = {
     scrollDown: 'Nach unten scrollen',
     popular: 'Beliebt',
     octoberOffer: 'OKTOBER-ANGEBOT',
-    octoberOfferLine: 'Oktober-Angebot',
-    octoberOfferUntil: 'Gültig bis 31. Oktober',
+    octoberOfferUntil: 'Nur an der Fitness-Rezeption, bis 31. Oktober',
     perMonth: 'entspricht {n} CHF / Monat',
     recentSubs:
       '{n} Person{s} haben dieses Abo in den letzten 24 Stunden gewählt',
@@ -92,8 +93,11 @@ export const ui = {
     warnTitle: 'Wie möchten Sie sich anmelden?',
     warnLead:
       'Die 10 %-Reduktion (AHV, Studierende, IV) gibt es nur an der Rezeption, nicht bei der Online-Zahlung.',
+    warnLeadPromo:
+      'Das Oktober-Angebot (−100 CHF auf 12 Monate) und die −10 % (AHV, Studierende, IV) gibt es nur an der Fitness-Rezeption, nicht online.',
     warnReception: 'An der Rezeption',
     warnReceptionSub: '−10 % mit Nachweis',
+    warnReceptionSubPromo: 'Angebot −100 CHF (12 Monate) und −10 % mit Nachweis',
     warnOnline: 'Online',
     warnOnlineSub: 'Vollpreis · {price} CHF',
     days: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
@@ -135,7 +139,7 @@ export const ui = {
     checkoutNote:
       'Online zum Vollpreis. Die −10 % (AHV, Studierende, IV) gibt es nur an der Rezeption.',
     checkoutNotePromo:
-      'Oktober-Angebot: −100 CHF auf das 12-Monats-Abo, bis 31. Oktober. Die −10 % (AHV, Studierende, IV) gibt es weiterhin nur an der Rezeption.',
+      'Online zum Vollpreis. Das −100-CHF-Angebot (12 Monate) und die −10 % (AHV, Studierende, IV) gibt es nur an der Fitness-Rezeption.',
     pay: 'Zur Zahlung',
     redirecting: 'Weiterleitung…',
     checkoutError: 'Ein Fehler ist aufgetreten, bitte erneut versuchen.',

@@ -8,6 +8,7 @@ import { applyPlanPromo } from '../lib/promo'
 import './Tarifs.css'
 
 function TarifReduitWarning({ plan, onContinue, onClose, t }) {
+  const receptionOffer = applyPlanPromo(plan).active
   useEffect(() => {
     const onKeyDown = (e) => {
       if (e.key === 'Escape') onClose()
@@ -36,7 +37,9 @@ function TarifReduitWarning({ plan, onContinue, onClose, t }) {
         <div className="tarifs-warn-panel__head">
           <p className="tarifs-warn-panel__plan">{plan.name}</p>
           <h3 id="tarif-warn-title">{t('warnTitle')}</h3>
-          <p className="tarifs-warn-panel__lead">{t('warnLead')}</p>
+          <p className="tarifs-warn-panel__lead">
+            {t(receptionOffer ? 'warnLeadPromo' : 'warnLead')}
+          </p>
         </div>
 
         <div className="tarifs-warn-panel__choices">
@@ -46,7 +49,7 @@ function TarifReduitWarning({ plan, onContinue, onClose, t }) {
             </span>
             <span className="tarifs-warn-choice__body">
               <strong>{t('warnReception')}</strong>
-              <span>{t('warnReceptionSub')}</span>
+              <span>{t(receptionOffer ? 'warnReceptionSubPromo' : 'warnReceptionSub')}</span>
             </span>
           </button>
 
@@ -60,7 +63,7 @@ function TarifReduitWarning({ plan, onContinue, onClose, t }) {
             </span>
             <span className="tarifs-warn-choice__body">
               <strong>{t('warnOnline')}</strong>
-              <span>{t('warnOnlineSub', { price: applyPlanPromo(plan).price })}</span>
+              <span>{t('warnOnlineSub', { price: plan.price })}</span>
             </span>
           </button>
         </div>

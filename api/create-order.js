@@ -9,7 +9,6 @@
 
 import { db, STATUS } from "./_lib/db.js";
 import { resolveOptions, resolvePlan } from "./_lib/catalog.js";
-import { applyPlanPromo } from "./_lib/promo.js";
 import { validateClient } from "./_lib/validation.js";
 import { initialize } from "./_lib/saferpay.js";
 import { baseUrl, readJson, sendJson } from "./_lib/http.js";
@@ -37,8 +36,7 @@ export default async function handler(req, res) {
   }
   const options = resolveOptions(payload.optionIds ?? []);
   const optionsTotal = options.reduce((s, o) => s + o.price, 0);
-  const promo = applyPlanPromo(plan);
-  const amount = promo.price + optionsTotal;
+  const amount = plan.price + optionsTotal;
 
   if (amount <= 0) {
     return sendJson(res, 422, { errors: ["Montant invalide"] });
@@ -95,14 +93,6 @@ export default async function handler(req, res) {
       contract_id: o.articleId,
     })),
     extra_fee: 0,
-    gsinfo_amount: plan.price + optionsTotal,
-    promo: promo.active
-      ? {
-          id: promo.id,
-          discount: promo.discount,
-          catalog_price: promo.catalogPrice,
-        }
-      : null,
   };
 
   const { data: order, error: orderErr } = await db

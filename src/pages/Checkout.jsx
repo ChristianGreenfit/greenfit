@@ -6,7 +6,7 @@ import Icon from '../components/Icon'
 import { useLocalizedContent } from '../i18n/useLocalizedContent'
 import { useLanguage } from '../i18n/LanguageContext'
 import { createOrder } from '../lib/api'
-import { applyPlanPromo } from '../lib/promo'
+import { isYearlyPromoActive, YEARLY_PROMO } from '../lib/promo'
 import './Checkout.css'
 
 function formatChf(amount) {
@@ -92,12 +92,13 @@ export default function Checkout() {
     return <Navigate to={home} replace />
   }
 
-  const promo = applyPlanPromo(plan)
+  const receptionOffer =
+    isYearlyPromoActive() && Number(plan.months) === YEARLY_PROMO.months
   const addonsTotal = selectedAddons.reduce((sum, id) => {
     const addon = addons.find((a) => a.id === id)
     return sum + (addon?.price ?? 0)
   }, 0)
-  const total = promo.price + addonsTotal
+  const total = plan.price + addonsTotal
 
   const toggleAddon = (id) => {
     setSelectedAddons((prev) =>
@@ -152,10 +153,7 @@ export default function Checkout() {
             <span className="eyebrow">{t('checkoutEyebrow')}</span>
             <h1>{t('checkoutTitle')}</h1>
             <p>
-              {t('checkoutPlan', { name: plan.name, price: promo.price })}
-              {promo.active ? (
-                <span className="checkout__offer-pill">{t('octoberOffer')}</span>
-              ) : null}
+              {t('checkoutPlan', { name: plan.name, price: plan.price })}
             </p>
           </header>
 
@@ -330,12 +328,6 @@ export default function Checkout() {
                   <span>{t('subscription', { name: plan.name })}</span>
                   <span>{formatChf(plan.price)}</span>
                 </div>
-                {promo.active ? (
-                  <div className="checkout__summary-row checkout__summary-row--offer">
-                    <span>{t('octoberOfferLine')}</span>
-                    <span>−{formatChf(promo.discount)}</span>
-                  </div>
-                ) : null}
                 {selectedAddons.map((id) => {
                   const addon = addons.find((a) => a.id === id)
                   if (!addon) return null
@@ -352,7 +344,7 @@ export default function Checkout() {
                 </div>
 
                 <p className="checkout__summary-note">
-                  {t(promo.active ? 'checkoutNotePromo' : 'checkoutNote')}
+                  {t(receptionOffer ? 'checkoutNotePromo' : 'checkoutNote')}
                 </p>
 
                 {submitError && <div className="checkout__submit-error">{submitError}</div>}
